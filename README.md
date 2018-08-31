@@ -9,25 +9,16 @@ Please Fork this repo and submit your solution in the fork
 Happy coding!
 
 ## Problem 
-{state problem}
+{state problem: needs to be something that involves python coding in classes, integrating some API (hopefully payment or something similar, that has several steps. One of those that have a callback would be nice).}
 
 ## Basic Functionality
 
-- A user should be able to create a note by starting to record audio
-- Notes should be created with the audio and transcribed using some ASR/Voice-to-Text service (e.g. Google ASR API or others)
-- Users should be able to edit the transcribed text
-- Users should be able to see a list of their notes
-- A location should automatically captured and saved metadata for the note
-- Users should be able to select a note and view the transcribed/edited text, playback the voice note, and view the location of where the voice note was originally taken.
+{list of functionality items the code should do.}
+{documentation on how to use it}
 
 ## Optional Extras 
 
 (These are ideas. You are not obligated to implement any of these. We prefer to see an app with limited feature set and quality code, as opposed to an app with more features that is hacked together)
 
-- Allow the user to attach a photo to a note
-- Allow the user to attach multiple photos to a note
-- Allow the user to share the audio + text via iMessage and other services that support that media
-- Allow the user to share the audio + text + attached image(s) via iMessage and other services that support that media
-- Map view of all the notes with a tap to select a note and view it
-- Create an iMessage app that, when activated in iMessage, shows a list of taken notes and allows for sharing
-- Create an AppleWatch app extension that lists the note items with their content
+{maybe for him to dockerize the code?}
+{maybe for him to do a full implementation, with nginx+gunicorn, ...}
