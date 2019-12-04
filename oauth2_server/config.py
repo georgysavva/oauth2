@@ -1,14 +1,16 @@
 import logging.config
 import os
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+USE_JSON_LOGGER_FORMATTER = False
+
+JWT_SIGNATURE_SECRET_KEY = '604fe435c2a4d63046741c572023c448b76af554c824a2065d53563fac168cd8'
+DEFAULT_USERS_SCOPE = ['/current_time', '/epoch_time']
 DEFAULT_APPLICATIONS = [
     {
         'client_id': '1234',
         'client_secret': 'qwerty'
     }
 ]
-USE_JSON_LOGGER_FORMATTER = False
 
 try:
     # This file won't get into git and docker image.
@@ -17,6 +19,9 @@ try:
     from configs.application_config import *
 except ImportError:
     pass
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+JSON_SCHEMAS_DIR = os.path.join(BASE_DIR, 'json_schemas')
 # Further improvement: create a separate json/yaml config file with default logging configuration.
 # And another one for environment specific logging.
 # It will allow adjust logging behaviour more precisely

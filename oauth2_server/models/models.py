@@ -1,7 +1,8 @@
 from __future__ import annotations
+
+import abc
 from dataclasses import dataclass
 from typing import List
-import abc
 
 GRANT_TYPE_AUTHORIZATION_CODE = 'code'
 GRANT_TYPE_PASSWORD = 'password'
@@ -17,10 +18,23 @@ class Application:
     client_secret: str
 
 
+# For now we don't have any persistence for users, since we grant access tokens to every one.
 @dataclass
 class User:
     id: str
+    username: str
     full_name: str
+
+
+# We use JWT to sign and verify access tokens, therefore we don't need to store them anywhere,
+# because JWT is a self encoded type of tokens.
+@dataclass
+class AccessTokenInfo:
+    user_id: str
+    client_id: str
+    issued_at: int
+    expires_at: int
+    scope: str
 
 
 class ApplicationsRepository(metaclass=abc.ABCMeta):
