@@ -1,10 +1,14 @@
+import flask_jsonschema
 from flask import Flask
-from flask_jsonschema import JsonSchema
 
-from config import JSON_SCHEMAS_DIR
+import paths
+from flaskapp import views
 
-app = Flask(__name__)
-app.config['JSONSCHEMA_DIR'] = JSON_SCHEMAS_DIR
-setattr(app, 'jsonschema', JsonSchema(app))
 
-import flaskapp.views
+def create_app(authorization_handler: views.AuthorizationHandler) -> Flask:
+    app = Flask(__name__)
+    app.config['JSONSCHEMA_DIR'] = paths.JSON_SCHEMAS_DIR
+    flask_jsonschema.JsonSchema(app)
+    authorization_handler.register_routes(app)
+    views.register_error_handlers(app)
+    return app

@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/schema#",
+  "type": "object",
+  "properties": {
+    "access_token": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "access_token"
+  ]
+}

@@ -1,10 +1,11 @@
 import logging
 
+import flask_jsonschema
 import jsonschema
-from flask import request, jsonify
+from flask import request, jsonify, Flask
 
-from flaskapp import app
-import oauth2.exceptions
+from oauth2 import exceptions
+from oauth2.access_token import AccessTokenManager
 
 logger = logging.getLogger(__name__)
 
@@ -17,86 +18,68 @@ ERROR_INVALID_ACCESS_TOKEN = 'invalid_access_token'
 ERROR_ACCESS_TOKEN_EXPIRED = 'access_token_expired'
 
 
-class APIError(Exception):
-    def __init__(self, message, error_code, status_code=400):
-        self.error_code = error_code
-        self.status_code = status_code
-        super().__init__(message)
+class AuthorizationHandler:
+    def __init__(self, token_manager: AccessTokenManager):
+        self._token_manager = token_manager
+
+    @flask_jsonschema.validate('issue_token_request')
+    def issue_token(self):
+        request_data = request.json
+        access_token = self._token_manager.issue_token(
+            request_data['grant_type'], request_data['client_id'],
+            request_data['client_secret'], request_data['username']
+        )
+        return jsonify({'access_token': access_token})
+
+    @flask_jsonschema.validate('issue_token_request')
+    def verify_token(self):
+        request_data = request.json
+        token_info = self._token_manager.get_token_info(request_data['access_token'])
+        return jsonify({
+            'user_id': token_info.user_id,
+            'client_id': token_info.client_id,
+            'issued_at': token_info.issued_at,
+            'expires_at': token_info.expires_at,
+            'scope': token_info.scope
+        })
+
+    def register_routes(self, flask_app: Flask):
+        flask_app.add_url_rule(
+            '/v1/token', methods=['POST'], view_func=self.issue_token
+        )
+        flask_app.add_url_rule(
+            '/v1/token', methods=['GET'], view_func=self.verify_token
+        )
 
 
-@app.route('/v1/token', methods=['POST'])
-@app.jsonschema.validate('obtain_token_request')
-def hello_world():
-    request_data = request.json
-    grant_type = request_data['grant_type']
-    try:
-        try:
-            raise KeyError("fff")
-        except:
-            logger.exception('blablala %s', 'iii', extra={'oo': 2})
-            pass
-        logger.info('blablalallllllllllll %s', 'iii', extra={'oo': 2})
-
-    except Exception as e:
-        print(e)
-        pass
-    # AccessTokenManager(None).issue_token('fff', '', '', '', '')
-
-    # if grant_type != models.GRANT_TYPE_PASSWORD:
-    #     logger.warning(f"Token request has unsupported grant type: {grant_type}")
-    # raise APIError()
-    #     return error_response(
-    #         ErrorCode.INVALID_REQUEST,
-    #         error_description=f"Unsupported grant type. "
-    #         f"Server only supports f{models.GrantType.PASSWORD.value} grant type."
-    #     )
-    # client_id = request_data['client_id']
-    # client_secret = request_data['client_secret']
-    # app_exists = models.Application.objects.filter(client_id=client_id,
-    #                                                client_secret=client_secret).exists()
-    # if not app_exists:
-    #     self.logger.info(f"Invalid client credentials for client id: {client_id}")
-    #     return error_response(
-    #         ErrorCode.INVALID_CLIENT,
-    #         f"Client with id {client_id} not found "
-    #         f"or pair client_id and client_secret does not match"
-    #     )
-    # # We don't use username and password.
-    # user = models.User.objects.first()
-    # if not user:
-    #     raise RuntimeError("We must have at least one user in db to operate")
-    return 'fff'
+def register_error_handlers(flask_app: Flask):
+    flask_app.errorhandler(jsonschema.ValidationError)(handle_json_validation_error)
+    flask_app.errorhandler(exceptions.InvalidClientError)(handle_invalid_client)
+    flask_app.errorhandler(exceptions.UnsupportedGrantTypeError)(handle_unsupported_grant_type)
+    flask_app.errorhandler(exceptions.InvalidAccessTokenError)(handle_invalid_access_token)
+    flask_app.errorhandler(exceptions.ExpiredAccessTokenError)(handle_expired_access_token)
 
 
-@app.errorhandler(jsonschema.ValidationError)
-def handle_error(error: jsonschema.ValidationError):
-    logger.warning("Request schema validation failed", extra={'error': error.message})
+def handle_json_validation_error(error: jsonschema.ValidationError):
+    error_details = str(error)
+    logger.warning("Request schema validation failed", extra={'error': error_details})
     return error_response(ERROR_INVALID_REQUEST,
-                          f"Request schema validation failed: {error.message}", 400)
+                          f"Request schema validation failed: {error_details}", 400)
 
 
-@app.errorhandler(APIError)
-def handle_error(error: APIError):
-    return error_response(error.error_code, str(error), error.status_code)
-
-
-@app.errorhandler(oauth2.exceptions.InvalidClientError)
-def handle_error(error: oauth2.exceptions.InvalidClientError):
+def handle_invalid_client(error: exceptions.InvalidClientError):
     return error_response(ERROR_INVALID_CLIENT, str(error), 400)
 
 
-@app.errorhandler(oauth2.exceptions.UnsupportedGrantTypeError)
-def handle_error(error: oauth2.exceptions.UnsupportedGrantTypeError):
+def handle_unsupported_grant_type(error: exceptions.UnsupportedGrantTypeError):
     return error_response(ERROR_UNSUPPORTED_GRANT_TYPE, str(error), 400)
 
 
-@app.errorhandler(oauth2.exceptions.InvalidAccessTokenError)
-def handle_error(error: oauth2.exceptions.InvalidAccessTokenError):
+def handle_invalid_access_token(error: exceptions.InvalidAccessTokenError):
     return error_response(ERROR_INVALID_ACCESS_TOKEN, str(error), 401)
 
 
-@app.errorhandler(oauth2.exceptions.ExpiredAccessTokenError)
-def handle_error(error: oauth2.exceptions.ExpiredAccessTokenError):
+def handle_expired_access_token(error: exceptions.ExpiredAccessTokenError):
     return error_response(ERROR_ACCESS_TOKEN_EXPIRED, str(error), 401)
 
 

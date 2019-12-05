@@ -16,13 +16,13 @@ class AccessTokenManager:
     def __init__(
         self,
         applications_repo: models.ApplicationsRepository,
-        default_users_scope: List[str], token_issuer_endpoint: str, jwt_secret: str,
+        default_users_scope: List[str], issuer_url: str, jwt_secret: str,
         token_lifetime: int
     ):
         self._apps_repo = applications_repo
         self._users_scope = default_users_scope
         self._jwt_secret = jwt_secret
-        self._issuer_endpoint = token_issuer_endpoint
+        self._issuer_endpoint = issuer_url
         self._token_lifetime = token_lifetime  # in seconds
 
     def issue_token(self, grant_type: str, client_id: str, client_secret: str,
