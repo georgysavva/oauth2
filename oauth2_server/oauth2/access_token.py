@@ -84,7 +84,7 @@ class AccessTokenManager:
             payload = jwt.decode(token, self._jwt_secret, algorithms=[self.JWT_ALGORITHM])
         except jwt.ExpiredSignatureError as e:
             logger.info("JWT token expired: %s", e)
-            raise exceptions.ExpiredAccessTokenError("Access token has expired")
+            raise exceptions.AccessTokenExpiredError("Access token has expired")
         except jwt.InvalidTokenError as e:
             logger.warning("JWT token validation failed", extra={'error': e})
             raise exceptions.InvalidAccessTokenError

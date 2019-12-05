@@ -16,5 +16,5 @@ class InvalidAccessTokenError(OAuthError):
         super().__init__(*args)
 
 
-class ExpiredAccessTokenError(OAuthError):
+class AccessTokenExpiredError(OAuthError):
     pass

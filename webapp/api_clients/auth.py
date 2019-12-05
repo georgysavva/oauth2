@@ -1,0 +1,38 @@
+import requests
+from api_clients import BaseAPIClient, IncorrectResponseError
+import logging
+
+logger = logging.getLogger(__name__)
+
+
+class AuthAPIClient(BaseAPIClient):
+    API_VERSION = 'v1'
+
+    def __init__(self, auth_api_base_url: str, client_id: str, client_secret: str):
+        self._client_id = client_id
+        self._client_secret = client_secret
+        self._api_base_url = auth_api_base_url
+
+    def request_access_token(self, grant_type: str, username: str, password: str) -> str:
+        url = self._build_full_url(endpoint='token')
+        resp = requests.post(url, json={
+            'grant_type': grant_type, 'client_id': self._client_id,
+            'client_secret': self._client_secret, 'username': username,
+            'password': password
+        })
+        # Further improvement: pass jsonschema to the base method,
+        # to have automated data validation.
+        # Now we have only one field so we can check it manually.
+        response_json = self.process_response(resp)
+        access_token = response_json.get('access_token')
+        if not access_token:
+            logger.warning(
+                "HTTP json body doesn't contain access_token field",
+                extra={'url': resp.url, 'status_code': resp.status_code,
+                       'json_body': response_json}
+            )
+            raise IncorrectResponseError("access_token field is missing")
+        return access_token
+
+    def _build_full_url(self, endpoint: str) -> str:
+        return f'{self._api_base_url}/{self.API_VERSION}/{endpoint}'

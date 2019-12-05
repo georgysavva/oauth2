@@ -1,4 +1,3 @@
-import json
 import logging
 
 import flask_jsonschema
@@ -25,8 +24,6 @@ class AuthorizationHandler:
 
     @flask_jsonschema.validate('issue_token_request')
     def issue_token(self):
-        logger.info('fff', extra={'foo': json.dumps({"kkk": 2, "lll": [222], "222": ["333"]})})
-        logger.info('aaa', extra={'foo': {"kkk": 2, "lll": [222], "222": ["333"]}})
         request_data = request.json
         access_token = self._token_manager.issue_token(
             request_data['grant_type'], request_data['client_id'],
@@ -60,7 +57,7 @@ def register_error_handlers(flask_app: Flask):
     flask_app.errorhandler(exceptions.InvalidClientError)(handle_invalid_client)
     flask_app.errorhandler(exceptions.UnsupportedGrantTypeError)(handle_unsupported_grant_type)
     flask_app.errorhandler(exceptions.InvalidAccessTokenError)(handle_invalid_access_token)
-    flask_app.errorhandler(exceptions.AccessTokenExpiredError)(handle_expired_access_token)
+    flask_app.errorhandler(exceptions.ExpiredAccessTokenError)(handle_expired_access_token)
 
 
 def handle_json_validation_error(error: jsonschema.ValidationError):
@@ -82,7 +79,7 @@ def handle_invalid_access_token(error: exceptions.InvalidAccessTokenError):
     return error_response(ERROR_INVALID_ACCESS_TOKEN, str(error), 401)
 
 
-def handle_expired_access_token(error: exceptions.AccessTokenExpiredError):
+def handle_expired_access_token(error: exceptions.ExpiredAccessTokenError):
     return error_response(ERROR_ACCESS_TOKEN_EXPIRED, str(error), 401)
 
 
