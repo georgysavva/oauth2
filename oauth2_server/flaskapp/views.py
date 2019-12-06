@@ -1,4 +1,3 @@
-import json
 import logging
 
 import flask_jsonschema
@@ -6,7 +5,7 @@ import jsonschema
 from flask import request, jsonify, Flask
 
 from oauth2 import exceptions
-from oauth2.access_token import AccessTokenManager
+from oauth2.service import Oauth2Service
 
 logger = logging.getLogger(__name__)
 
@@ -20,15 +19,13 @@ ERROR_ACCESS_TOKEN_EXPIRED = 'access_token_expired'
 
 
 class AuthorizationHandler:
-    def __init__(self, token_manager: AccessTokenManager):
-        self._token_manager = token_manager
+    def __init__(self, oauth2_service: Oauth2Service):
+        self._oauth2_service = oauth2_service
 
     @flask_jsonschema.validate('issue_token_request')
     def issue_token(self):
-        logger.info('fff', extra={'foo': json.dumps({"kkk": 2, "lll": [222], "222": ["333"]})})
-        logger.info('aaa', extra={'foo': {"kkk": 2, "lll": [222], "222": ["333"]}})
         request_data = request.json
-        access_token = self._token_manager.issue_token(
+        access_token = self._oauth2_service.issue_token(
             request_data['grant_type'], request_data['client_id'],
             request_data['client_secret'], request_data['username']
         )
@@ -37,7 +34,7 @@ class AuthorizationHandler:
     @flask_jsonschema.validate('issue_token_request')
     def verify_token(self):
         request_data = request.json
-        token_info = self._token_manager.get_token_info(request_data['access_token'])
+        token_info = self._oauth2_service.get_token_info(request_data['access_token'])
         return jsonify({
             'user_id': token_info.user_id,
             'client_id': token_info.client_id,
@@ -46,7 +43,7 @@ class AuthorizationHandler:
             'scope': token_info.scope
         })
 
-    def register_routes(self, flask_app: Flask):
+    def register_routes(self, flask_app: Flask) -> None:
         flask_app.add_url_rule(
             '/v1/token', methods=['POST'], view_func=self.issue_token
         )
@@ -55,7 +52,7 @@ class AuthorizationHandler:
         )
 
 
-def register_error_handlers(flask_app: Flask):
+def register_error_handlers(flask_app: Flask) -> None:
     flask_app.errorhandler(jsonschema.ValidationError)(handle_json_validation_error)
     flask_app.errorhandler(exceptions.InvalidClientError)(handle_invalid_client)
     flask_app.errorhandler(exceptions.UnsupportedGrantTypeError)(handle_unsupported_grant_type)

@@ -8,14 +8,6 @@ from apis.resource import ResourceAPI
 
 logger = logging.getLogger(__name__)
 
-# Error code are from the oauth2 rfc:
-# https://tools.ietf.org/html/rfc6749
-ERROR_INVALID_REQUEST = 'invalid_request'
-ERROR_INVALID_CLIENT = 'invalid_client'
-ERROR_UNSUPPORTED_GRANT_TYPE = 'unsupported_grant_type'
-ERROR_INVALID_ACCESS_TOKEN = 'invalid_access_token'
-ERROR_ACCESS_TOKEN_EXPIRED = 'access_token_expired'
-
 
 class Handler:
     def __init__(self, auth_api: AuthAPI, resource_api: ResourceAPI):

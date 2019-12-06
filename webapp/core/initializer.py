@@ -30,7 +30,7 @@ def create_http_handler(auth_api: AuthAPI, resource_api: ResourceAPI) -> views.H
     return views.Handler(auth_api, resource_api)
 
 
-def initialize_wsgi() -> flask.Flask:
+def create_wsgi() -> flask.Flask:
     auth_api = create_auth_api_client()
     resource_api = create_resource_api_client()
     http_handler = create_http_handler(auth_api, resource_api)

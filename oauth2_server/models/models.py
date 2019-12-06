@@ -34,7 +34,7 @@ class AccessTokenInfo:
     client_id: str
     issued_at: int
     expires_at: int
-    scope: str
+    scope: List[str]
 
 
 class ApplicationsRepository(metaclass=abc.ABCMeta):

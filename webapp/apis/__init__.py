@@ -10,14 +10,21 @@ logger = logging.getLogger(__name__)
 ERROR_CODE_INVALID_REQUEST = 'invalid_request'
 
 
+# Further improvement: move this class to a library,
+# because it used in both resource_server and webapp services.
 class BaseAPIClient:
-    def process_response(self, response: requests.Response, json_body_required=True
-                         ) -> Optional[dict]:
+    api_version = 'v1'
+
+    def __init__(self, api_base_url: str):
+        self._api_base_url = api_base_url
+
+    def _process_response(self, response: requests.Response, json_body_required=True
+                          ) -> Optional[dict]:
         try:
             response_json = response.json()
         except ValueError:
             response_json = None
-        self.raise_error_if_necessary(response, response_json)
+        self._raise_error_if_necessary(response, response_json)
         response.raise_for_status()
         if json_body_required and not response_json:
             logger.warning(
@@ -25,11 +32,11 @@ class BaseAPIClient:
                 extra={'url': response.url, 'status_code': response.status_code,
                        'body': response.text}
             )
-            raise IncorrectResponseError("Empty json body")
+            raise IncorrectResponseError("Empty json body", response)
         return response_json
 
-    def raise_error_if_necessary(self, response: requests.Response,
-                                 response_json: Optional[dict]) -> None:
+    def _raise_error_if_necessary(self, response: requests.Response,
+                                  response_json: Optional[dict]) -> None:
         if not response_json:
             return
         error_code = response_json.get('error')
@@ -40,4 +47,7 @@ class BaseAPIClient:
                 extra={'url': response.url, 'status_code': response.status_code,
                        'json_body': response_json}
             )
-            raise InvalidRequestError(error_description)
+            raise InvalidRequestError(error_description, response)
+
+    def _build_full_url(self, endpoint: str) -> str:
+        return f'{self._api_base_url}/{self.api_version}/{endpoint}'

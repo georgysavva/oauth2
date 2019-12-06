@@ -10,8 +10,8 @@ from oauth2 import exceptions
 logger = logging.getLogger(__name__)
 
 
-class AccessTokenManager:
-    JWT_ALGORITHM = 'HS256'
+class Oauth2Service:
+    jwt_algorithm = 'HS256'
 
     def __init__(
         self,
@@ -39,9 +39,9 @@ class AccessTokenManager:
         if not application or application.client_secret != client_secret:
             log_ctx = {'client_id': client_id}
             if not application:
-                logger.info("Application with that client id not found", extra=log_ctx)
+                logger.warning("Application with that client id not found", extra=log_ctx)
             if application.client_secret != client_secret:
-                logger.info("Client secrets don't match", extra=log_ctx)
+                logger.warning("Client secrets don't match", extra=log_ctx)
             raise exceptions.InvalidClientError(
                 f"Client with id {client_id} not found "
                 f"or pair client_id and client_secret does not match"
@@ -50,8 +50,7 @@ class AccessTokenManager:
         # But since we grant access token to anyone we won't do that
         user_id = username
 
-        scope = " ".join(self._users_scope)
-        access_token = self._create_token(user_id, client_id, scope)
+        access_token = self._create_token(user_id, client_id, self._users_scope)
         return access_token
 
     def get_token_info(self, token: str) -> models.AccessTokenInfo:
@@ -61,7 +60,7 @@ class AccessTokenManager:
         # So can just return the token info
         return token_info
 
-    def _create_token(self, user_id: str, client_id: str, scope: str) -> str:
+    def _create_token(self, user_id: str, client_id: str, scope: List[str]) -> str:
         issued_at = int(datetime.utcnow().timestamp())
         expires_at = issued_at + self._token_lifetime
         token_info = models.AccessTokenInfo(user_id, client_id, issued_at, expires_at, scope)
@@ -75,13 +74,13 @@ class AccessTokenManager:
             'cid': token_info.client_id,
             'iat': token_info.issued_at,
             'exp': token_info.expires_at,
-            'scope': token_info.scope,
+            'scope': ' '.join(token_info.scope),
         }
-        return jwt.encode(payload, self._jwt_secret, self.JWT_ALGORITHM)
+        return jwt.encode(payload, self._jwt_secret, self.jwt_algorithm)
 
     def _decode_jwt_token(self, token: str) -> models.AccessTokenInfo:
         try:
-            payload = jwt.decode(token, self._jwt_secret, algorithms=[self.JWT_ALGORITHM])
+            payload = jwt.decode(token, self._jwt_secret, algorithms=[self.jwt_algorithm])
         except jwt.ExpiredSignatureError as e:
             logger.info("JWT token expired: %s", e)
             raise exceptions.AccessTokenExpiredError("Access token has expired")
@@ -100,5 +99,5 @@ class AccessTokenManager:
             client_id=payload['cid'],
             issued_at=payload['iat'],
             expires_at=payload['exp'],
-            scope=payload['scope'],
+            scope=payload['scope'].split(' '),
         )

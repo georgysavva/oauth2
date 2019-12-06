@@ -18,9 +18,3 @@ class InvalidAccessTokenError(APIError):
 
 class AccessTokenExpiredError(APIError):
     pass
-
-
-class PermissionDeniedError(APIError):
-    def __init__(self, message, denied_resource, response, *args):
-        self.denied_resource = denied_resource
-        super().__init__(message, response, *args)

@@ -8,7 +8,6 @@ CLIENT_ID = '1234'
 CLIENT_SECRET = 'qwert'
 
 AUTH_API_BASE_URL = 'http://localhost:5001'
-RESOURCE_API_BASE_URL = 'http://localhost:5002'
 
 UNITTEST_ENV = 'pytest' in os.path.basename(sys.argv[0])
 
