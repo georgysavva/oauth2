@@ -32,7 +32,7 @@ def create_access_token_manager(
     return token_manager
 
 
-def create_authorization_handler(
+def create_http_handler(
     access_token_manager: AccessTokenManager) -> views.AuthorizationHandler:
     return views.AuthorizationHandler(access_token_manager)
 
@@ -40,5 +40,5 @@ def create_authorization_handler(
 def initialize_wsgi() -> flask.Flask:
     applications_repo = create_applications_repository()
     access_token_manager = create_access_token_manager(applications_repo)
-    http_handler = create_authorization_handler(access_token_manager)
+    http_handler = create_http_handler(access_token_manager)
     return flaskapp.create_app(http_handler)

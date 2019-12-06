@@ -1,22 +1,13 @@
 import logging
-import requests
 from typing import Optional
+
+import requests
+
+from apis.exceptions import IncorrectResponseError, InvalidRequestError
 
 logger = logging.getLogger(__name__)
 
 ERROR_CODE_INVALID_REQUEST = 'invalid_request'
-
-
-class APIError(Exception):
-    pass
-
-
-class InvalidRequestError(APIError):
-    pass
-
-
-class IncorrectResponseError(APIError):
-    pass
 
 
 class BaseAPIClient:

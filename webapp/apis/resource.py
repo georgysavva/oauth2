@@ -1,22 +1,17 @@
+import logging
 from typing import Optional
 
 import requests
-from api_clients import BaseAPIClient, APIError, IncorrectResponseError
-import logging
+
+from apis import BaseAPIClient
+from apis.exceptions import (
+    IncorrectResponseError, InvalidAccessTokenError,
+    AccessTokenExpiredError, PermissionDeniedError
+)
 
 logger = logging.getLogger(__name__)
 
 
-class InvalidAccessTokenError(APIError):
-    pass
-
-
-class AccessTokenExpiredError(APIError):
-    pass
-
-
-class PermissionDeniedError(APIError):
-    pass
 
 
 ERROR_CODE_INVALID_ACCESS_TOKEN = 'invalid_access_token'
@@ -24,7 +19,7 @@ ERROR_CODE_ACCESS_TOKEN_EXPIRED = 'access_token_expired'
 ERROR_CODE_PERMISSION_DENIED = 'permission_denied'
 
 
-class ResourceAPIClient(BaseAPIClient):
+class ResourceAPI(BaseAPIClient):
     API_VERSION = 'v1'
 
     def __init__(self, resource_api_base_url: str):

@@ -1,44 +1,37 @@
-from typing import List, Optional
+from typing import Optional
 
 import flask
 
 import flaskapp
+from apis.auth import AuthAPI
+from apis.resource import ResourceAPI
 from core import config
 from flaskapp import views
-from inmem_storage.applications import InMemApplicationsRepo
-from models import models
-from oauth2.access_token import AccessTokenManager
 
 
-def create_applications_repository(
-    default_apps: Optional[List[dict]] = None) -> InMemApplicationsRepo:
-    default_apps = default_apps or config.DEFAULT_OAUTH_APPLICATIONS
-    apps_repo = InMemApplicationsRepo().create_default_apps(default_apps)
-    return apps_repo
+def create_auth_api_client(
+    auth_api_base_url: Optional[str] = None,
+    client_id: Optional[str] = None, client_secret: Optional[str] = None
+) -> AuthAPI:
+    auth_api_base_url = auth_api_base_url or config.AUTH_API_BASE_URL
+    client_id = client_id or config.CLIENT_ID
+    client_secret = client_secret or config.CLIENT_SECRET
+    auth_api = AuthAPI(auth_api_base_url, client_id, client_secret)
+    return auth_api
 
 
-def create_access_token_manager(
-    applications_repo: models.ApplicationsRepository,
-    default_users_scope: Optional[List[str]] = None, issuer_url: Optional[str] = None,
-    jwt_secret_key: Optional[str] = None, access_token_lifetime: Optional[int] = None
-) -> AccessTokenManager:
-    default_users_scope = default_users_scope or config.DEFAULT_USERS_SCOPE
-    issuer_url = issuer_url or config.ISSUER_URL
-    jwt_secret_key = jwt_secret_key or config.JWT_SECRET_KEY
-    access_token_lifetime = access_token_lifetime or config.ACCESS_TOKEN_LIFETIME
-    token_manager = AccessTokenManager(
-        applications_repo, default_users_scope, issuer_url, jwt_secret_key, access_token_lifetime
-    )
-    return token_manager
+def create_resource_api_client(resource_api_base_url: Optional[str] = None) -> ResourceAPI:
+    resource_api_base_url = resource_api_base_url or config.RESOURCE_API_BASE_URL
+    resource_api = ResourceAPI(resource_api_base_url)
+    return resource_api
 
 
-def create_authorization_handler(
-    access_token_manager: AccessTokenManager) -> views.AuthorizationHandler:
-    return views.AuthorizationHandler(access_token_manager)
+def create_http_handler(auth_api: AuthAPI, resource_api: ResourceAPI) -> views.Handler:
+    return views.Handler(auth_api, resource_api)
 
 
 def initialize_wsgi() -> flask.Flask:
-    applications_repo = create_applications_repository()
-    access_token_manager = create_access_token_manager(applications_repo)
-    http_handler = create_authorization_handler(access_token_manager)
+    auth_api = create_auth_api_client()
+    resource_api = create_resource_api_client()
+    http_handler = create_http_handler(auth_api, resource_api)
     return flaskapp.create_app(http_handler)

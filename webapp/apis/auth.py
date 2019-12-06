@@ -1,11 +1,13 @@
-import requests
-from api_clients import BaseAPIClient, IncorrectResponseError
 import logging
+
+import requests
+
+from apis import BaseAPIClient, IncorrectResponseError
 
 logger = logging.getLogger(__name__)
 
 
-class AuthAPIClient(BaseAPIClient):
+class AuthAPI(BaseAPIClient):
     API_VERSION = 'v1'
 
     def __init__(self, auth_api_base_url: str, client_id: str, client_secret: str):

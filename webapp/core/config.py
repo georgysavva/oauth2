@@ -4,9 +4,13 @@ import sys
 
 USE_JSON_LOGGER_FORMATTER = False
 
+DEV_SERVER_PORT = 5003
+
 CLIENT_ID = '1234'
 CLIENT_SECRET = 'qwert'
-USERNAME = 'bob'
+
+AUTH_API_BASE_URL = 'http://localhost:5001'
+RESOURCE_API_BASE_URL = 'http://localhost:5002'
 
 UNITTEST_ENV = 'pytest' in os.path.basename(sys.argv[0])
 
