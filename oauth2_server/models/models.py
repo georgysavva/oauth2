@@ -32,6 +32,7 @@ class User:
 class AccessTokenInfo:
     user_id: str
     client_id: str
+    issuer_url: str
     issued_at: int
     expires_at: int
     scope: List[str]

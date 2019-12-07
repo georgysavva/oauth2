@@ -6,8 +6,8 @@ USE_JSON_LOGGER_FORMATTER = False
 
 JWT_SECRET_KEY = '604fe435c2a4d63046741c572023c448b76af554c824a2065d53563fac168cd8'
 ACCESS_TOKEN_LIFETIME = 5  # in seconds
-DEFAULT_USERS_SCOPE = ['/current_time', '/epoch_time']
-ISSUER_URL = 'http://localhost:5000/v1/token'
+DEFAULT_USERS_SCOPE = ['current_time', 'epoch_time']
+ISSUER_URL = 'http://localhost:5001/v1/token'
 DEFAULT_OAUTH_APPLICATIONS = [
     {
         'client_id': '1234',

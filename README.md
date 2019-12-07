@@ -25,3 +25,10 @@ Here are some important points to take into account:
 * Finally, the webapp server should be able to access the resource server by submitting an API call to it and providing the session token obtained. The resource server should validate the session token and check that the requested endpoint and user are correct before serving back the information. 
 * Implementation of this exercise should be done in python and using 3 different docker containers joined together using docker_compose. It should be possible to run the exercise by just executing the docker compose, providing an entrypoint to the webapp server to perform the `curl` calls.
 
+
+# Some further improvements:
+# Add code style check to the project
+# Since there are python annotations in the project we may add static linter
+# Add Sentry
+# Use python context variables to store request bound values such as user_id, client_id, request_id and blend them into each log record via logging.Filter
+# Split python requirements into main and dev specific.

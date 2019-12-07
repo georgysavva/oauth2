@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List
 
 import jwt
@@ -33,17 +33,17 @@ class Oauth2Service:
             )
             raise exceptions.UnsupportedGrantTypeError(
                 f"Unsupported grant type. "
-                f"Server only supports f{models.GRANT_TYPE_PASSWORD} grant type."
+                f"Server only supports '{models.GRANT_TYPE_PASSWORD}' grant type."
             )
         application = self._apps_repo.get(client_id)
         if not application or application.client_secret != client_secret:
             log_ctx = {'client_id': client_id}
             if not application:
                 logger.warning("Application with that client id not found", extra=log_ctx)
-            if application.client_secret != client_secret:
+            else:
                 logger.warning("Client secrets don't match", extra=log_ctx)
             raise exceptions.InvalidClientError(
-                f"Client with id {client_id} not found "
+                f"Client with id '{client_id}' not found "
                 f"or pair client_id and client_secret does not match"
             )
         # Now we should check username and password and found the corresponding user in the db
@@ -61,22 +61,25 @@ class Oauth2Service:
         return token_info
 
     def _create_token(self, user_id: str, client_id: str, scope: List[str]) -> str:
-        issued_at = int(datetime.utcnow().timestamp())
+        issued_at = int(datetime.now(timezone.utc).timestamp())
         expires_at = issued_at + self._token_lifetime
-        token_info = models.AccessTokenInfo(user_id, client_id, issued_at, expires_at, scope)
+        token_info = models.AccessTokenInfo(user_id, client_id, self._issuer_url, issued_at,
+                                            expires_at, scope)
         token = self._encode_jwt_token(token_info)
         return token
 
     def _encode_jwt_token(self, token_info: models.AccessTokenInfo) -> str:
         payload = {
             'sub': token_info.user_id,
-            'iss': self._issuer_url,
+            'iss': token_info.issuer_url,
             'cid': token_info.client_id,
             'iat': token_info.issued_at,
             'exp': token_info.expires_at,
             'scope': ' '.join(token_info.scope),
         }
-        return jwt.encode(payload, self._jwt_secret, self.jwt_algorithm)
+        token_bytes = jwt.encode(payload, self._jwt_secret, self.jwt_algorithm)
+        token = token_bytes.decode()
+        return token
 
     def _decode_jwt_token(self, token: str) -> models.AccessTokenInfo:
         try:
@@ -89,15 +92,22 @@ class Oauth2Service:
             raise exceptions.InvalidAccessTokenError()
         # Validate presence and type of field that are not validates by the jwt library.
         # Further improvement: use json schema to validate all fields and their types.
-        for field in ['sub', 'cid', 'scope']:
+        for field in ['iss', 'sub', 'cid', 'scope']:
             value = payload.get(field)
             if type(value) != str:
-                logger.warning("JWT payload doesn't contain all required fields with proper types",
+                logger.warning("JWT payload does not contain all required fields with proper types",
+                               extra={'payload': payload})
+                raise exceptions.InvalidAccessTokenError()
+        for field in ['iat', 'exp']:
+            value = payload.get(field)
+            if type(value) != int:
+                logger.warning("JWT payload does not contain all required fields with proper types",
                                extra={'payload': payload})
                 raise exceptions.InvalidAccessTokenError()
         return models.AccessTokenInfo(
             user_id=payload['sub'],
             client_id=payload['cid'],
+            issuer_url=payload['iss'],
             issued_at=payload['iat'],
             expires_at=payload['exp'],
             scope=payload['scope'].split(' '),

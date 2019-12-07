@@ -31,13 +31,14 @@ class AuthorizationHandler:
         )
         return jsonify({'access_token': access_token})
 
-    @flask_jsonschema.validate('issue_token_request')
-    def verify_token(self):
+    @flask_jsonschema.validate('get_token_info_request')
+    def get_token_info(self):
         request_data = request.json
         token_info = self._oauth2_service.get_token_info(request_data['access_token'])
         return jsonify({
             'user_id': token_info.user_id,
             'client_id': token_info.client_id,
+            'issuer_url': token_info.issuer_url,
             'issued_at': token_info.issued_at,
             'expires_at': token_info.expires_at,
             'scope': token_info.scope
@@ -48,7 +49,7 @@ class AuthorizationHandler:
             '/v1/token', methods=['POST'], view_func=self.issue_token
         )
         flask_app.add_url_rule(
-            '/v1/token', methods=['GET'], view_func=self.verify_token
+            '/v1/token', methods=['GET'], view_func=self.get_token_info
         )
 
 
