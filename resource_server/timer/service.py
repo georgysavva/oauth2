@@ -34,8 +34,9 @@ class TimerService:
     @staticmethod
     def _check_scope(scope: List[str], resource: str) -> None:
         if resource not in scope:
-            logger.warning("Resource not in the token scope",
-                        extra={'scope': scope, 'resource': resource})
+            logger.warning(
+                "Resource not in the token scope", extra={'scope': scope, 'resource': resource}
+            )
             raise PermissionDeniedError(
                 f"Access to resource {resource} denied, out of the token scope",
                 resource

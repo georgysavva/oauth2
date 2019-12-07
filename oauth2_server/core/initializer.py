@@ -10,8 +10,8 @@ from models import models
 from oauth2.service import Oauth2Service
 
 
-def create_applications_repository(
-    default_apps: Optional[List[dict]] = None) -> InMemApplicationsRepo:
+def create_applications_repository(default_apps: Optional[List[dict]] = None
+                                   ) -> InMemApplicationsRepo:
     default_apps = default_apps or config.DEFAULT_OAUTH_APPLICATIONS
     apps_repo = InMemApplicationsRepo().create_default_apps(default_apps)
     return apps_repo
@@ -32,8 +32,7 @@ def create_oauth2_service(
     return service
 
 
-def create_http_handler(
-    oauth2_service: Oauth2Service) -> views.AuthorizationHandler:
+def create_http_handler(oauth2_service: Oauth2Service) -> views.AuthorizationHandler:
     return views.AuthorizationHandler(oauth2_service)
 
 

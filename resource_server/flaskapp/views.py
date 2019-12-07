@@ -51,11 +51,11 @@ class Handler:
         )
 
 
-def register_error_handlers(flask_app: Flask):
-    flask_app.errorhandler(InvalidAccessTokenError)(handle_access_token_expired)
+def register_error_handlers(flask_app: Flask) -> None:
+    flask_app.errorhandler(InvalidAccessTokenError)(handle_invalid_access_token)
     flask_app.errorhandler(AccessTokenExpiredError)(handle_access_token_expired)
     flask_app.errorhandler(PermissionDeniedError)(handle_permission_denied)
-    flask_app.errorhandler(BadAuthorizationHeader)(handle_permission_denied)
+    flask_app.errorhandler(BadAuthorizationHeader)(handle_bad_authorization_header)
 
 
 def handle_invalid_access_token(error: InvalidAccessTokenError):

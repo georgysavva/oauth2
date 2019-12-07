@@ -22,7 +22,7 @@ class Oauth2Service:
         self._apps_repo = applications_repo
         self._users_scope = default_users_scope
         self._jwt_secret = jwt_secret
-        self._issuer_endpoint = issuer_url
+        self._issuer_url = issuer_url
         self._token_lifetime = token_lifetime  # in seconds
 
     def issue_token(self, grant_type: str, client_id: str, client_secret: str,
@@ -70,7 +70,7 @@ class Oauth2Service:
     def _encode_jwt_token(self, token_info: models.AccessTokenInfo) -> str:
         payload = {
             'sub': token_info.user_id,
-            'iss': self._issuer_endpoint,
+            'iss': self._issuer_url,
             'cid': token_info.client_id,
             'iat': token_info.issued_at,
             'exp': token_info.expires_at,
@@ -85,15 +85,16 @@ class Oauth2Service:
             logger.info("JWT token expired: %s", e)
             raise exceptions.AccessTokenExpiredError("Access token has expired")
         except jwt.InvalidTokenError as e:
-            logger.warning("JWT token validation failed", extra={'error': e})
-            raise exceptions.InvalidAccessTokenError
+            logger.warning("JWT token decoding failed", extra={'error': e})
+            raise exceptions.InvalidAccessTokenError()
         # Validate presence and type of field that are not validates by the jwt library.
+        # Further improvement: use json schema to validate all fields and their types.
         for field in ['sub', 'cid', 'scope']:
             value = payload.get(field)
             if type(value) != str:
                 logger.warning("JWT payload doesn't contain all required fields with proper types",
                                extra={'payload': payload})
-                raise exceptions.InvalidAccessTokenError
+                raise exceptions.InvalidAccessTokenError()
         return models.AccessTokenInfo(
             user_id=payload['sub'],
             client_id=payload['cid'],

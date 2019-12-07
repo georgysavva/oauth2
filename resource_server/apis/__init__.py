@@ -2,7 +2,7 @@ import json
 import logging
 import os
 import sys
-from typing import Optional, List
+from typing import Optional, List, Dict
 
 import requests
 
@@ -40,7 +40,7 @@ class BaseAPIClient:
         )
         return abs_path_to_schemas_dir
 
-    def _load_schemas(self, abs_schemas_dir_path: str):
+    def _load_schemas(self, abs_schemas_dir_path: str) -> Optional[Dict[str, dict]]:
         if not self.schema_names:
             return
         loaded_schemas = {}
@@ -54,18 +54,33 @@ class BaseAPIClient:
             loaded_schemas[schema_name] = schema_data
         return loaded_schemas
 
-    def _process_response(self, response: requests.Response, schema_name=None,
-                          json_body_required=True) -> Optional[dict]:
+    def _process_response(self, response: requests.Response, schema_name: Optional[str] = None,
+                          json_body_required: bool = True) -> dict:
         try:
             response_json = response.json()
         except ValueError:
             response_json = None
         self._raise_error_if_necessary(response, response_json)
         response.raise_for_status()
+        return self._validate_response(response, response_json, json_body_required, schema_name)
+
+    def _validate_response(self, response: requests.Response, response_json: dict,
+                           json_body_required: bool = True,
+                           schema_name: Optional[str] = None) -> dict:
+
         if (json_body_required or schema_name) and not response_json:
             raise IncorrectResponseError("Empty json body", response)
         if schema_name:
-            validation_schema = self._json_schemas[schema_name]
+            if self._json_schemas is None:
+                # Further improvement: use some custom exception class for those type of errors.
+                raise RuntimeError(f"Json schemas were not loaded you can't use 'schema_name' arg")
+            try:
+                validation_schema = self._json_schemas[schema_name]
+            except KeyError as e:
+                loaded_schema_names = list(self._json_schemas.keys())
+                raise RuntimeError(
+                    f"Json schema {schema_name} not found in loaded schemas: {loaded_schema_names}"
+                ) from e
             try:
                 jsonschema.validate(response_json, validation_schema)
             except jsonschema.ValidationError as e:
@@ -79,7 +94,6 @@ class BaseAPIClient:
                 )
                 raise IncorrectResponseError(f"Response body validation failed: {e.message}",
                                              response) from e
-                pass
         return response_json
 
     def _raise_error_if_necessary(self, response: requests.Response,

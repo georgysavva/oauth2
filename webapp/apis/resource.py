@@ -67,8 +67,7 @@ class ResourceAPI(BaseAPIClient):
         if error_code == ERROR_CODE_ACCESS_TOKEN_EXPIRED:
             raise AccessTokenExpiredError(error_description, response)
         if error_code == ERROR_CODE_PERMISSION_DENIED:
-            denied_resource = response_json.get('denied_resource')
-            raise PermissionDeniedError(error_description, denied_resource, response)
+            raise PermissionDeniedError(error_description, response)
 
     @staticmethod
     def _build_bearer_header(access_token: str) -> dict:
