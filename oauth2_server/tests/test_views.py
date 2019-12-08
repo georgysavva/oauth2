@@ -1,7 +1,8 @@
+from unittest import mock
+
 import jwt
 import pytest
 from freezegun import freeze_time
-from unittest import mock
 
 
 def issue_token_valid_request_data():
@@ -142,7 +143,7 @@ def test_get_token_info_access_token_expired(flask_client):
         resp = flask_client.post('/v1/token', json=issue_token_valid_request_data())
     assert resp.status_code == 200
     assert resp.json == {
-        'access_token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJib2IiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjUwMDEvdjEvdG9rZW4iLCJjaWQiOiIxMjM0IiwiaWF0IjoxNTc1NTk0MDAwLCJleHAiOjE1NzU1OTQwMDUsInNjb3BlIjoiY3VycmVudF90aW1lIGVwb2NoX3RpbWUifQ.Ncs1HU4nbO7nYr1U9WCA59VsBMzF4qrcHc0BzLwsLIE'
+        'access_token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJib2IiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjUwMDEvdjEvdG9rZW4iLCJjaWQiOiIxMjM0IiwiaWF0IjoxNTc1NTk0MDAwLCJleHAiOjE1NzU1OTQwMDUsInNjb3BlIjoiY3VycmVudF90aW1lIGVwb2NoX3RpbWUifQ.Ncs1HU4nbO7nYr1U9WCA59VsBMzF4qrcHc0BzLwsLIE',
     }
     token = resp.json['access_token']
     with freeze_time("2019-12-06T02:00:00+00:00"):

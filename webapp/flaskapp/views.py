@@ -36,12 +36,12 @@ class Handler:
     def _get_access_token(self) -> str:
         grant_type = 'password'
         username = 'bob'
-        password = 'bob-pass'
         logger.info(
             "Requesting access token from the oauth2 server",
-            extra={'grant_type': grant_type, 'username': username, 'password': password}
+            extra={'grant_type': grant_type, 'username': username}
         )
-        access_token = self._auth_client.request_access_token(grant_type, username, password)
+        access_token = self._auth_client.request_access_token(grant_type, username,
+                                                              password='bob-pass')
         return access_token
 
     def register_routes(self, flask_app: Flask) -> None:

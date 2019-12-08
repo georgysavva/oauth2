@@ -5,7 +5,7 @@ import sys
 USE_JSON_LOGGER_FORMATTER = False
 
 CLIENT_ID = '1234'
-CLIENT_SECRET = 'qwert'
+CLIENT_SECRET = 'qwerty'
 
 AUTH_API_BASE_URL = 'http://localhost:5001'
 RESOURCE_API_BASE_URL = 'http://localhost:5002'

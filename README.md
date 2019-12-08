@@ -32,3 +32,5 @@ Here are some important points to take into account:
 # Add Sentry
 # Use python context variables to store request bound values such as user_id, client_id, request_id and blend them into each log record via logging.Filter
 # Split python requirements into main and dev specific.
+# Right now unit tests are testing services at the higher they call views and receive https responses. They test all modules that are involved in the request processing. It goes against the spirit of unit tests actually :) So a better approach is to test every layer separately and mock layers beneath. I.e. We could test API clients layer, service layer; http layer. But since the logic is pretty simple and the request flow is flat it's ok to test all cases at the higher (views, http) level.
+

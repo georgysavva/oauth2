@@ -1,9 +1,10 @@
-from apis.auth import AuthAPI, AuthorizationError
-from models import models
+import logging
 from datetime import datetime, timezone
 from typing import List
+
+from apis.auth import AuthAPI, AuthorizationError
+from models import models
 from timer.exceptions import PermissionDeniedError
-import logging
 
 logger = logging.getLogger(__name__)
 

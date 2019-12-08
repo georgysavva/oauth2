@@ -4,17 +4,6 @@ import requests_mock
 
 import apis
 
-
-def issue_token_valid_request_data():
-    return {
-        'client_id': '1234',
-        'client_secret': 'qwerty',
-        'username': 'bob',
-        'password': 'pass',
-        'grant_type': 'password'
-    }
-
-
 valid_access_token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJib2IiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjUwMDEvdjEvdG9rZW4iLCJjaWQiOiIxMjM0IiwiaWF0IjoxNTc1NTk0MDAwLCJleHAiOjE1NzU1OTQwMDUsInNjb3BlIjoiY3VycmVudF90aW1lIGVwb2NoX3RpbWUifQ.Ncs1HU4nbO7nYr1U9WCA59VsBMzF4qrcHc0BzLwsLIE'  # noqa
 
 
@@ -28,7 +17,7 @@ def test_get_current_time_and_epoch_time_smoke(flask_client, time_resource_name,
         return request.json() == {
             'grant_type': 'password',
             'client_id': '1234',
-            'client_secret': 'qwert',
+            'client_secret': 'qwerty',
             'username': 'bob',
             'password': 'bob-pass'
         }

@@ -49,7 +49,7 @@ class BaseAPIClient:
             logger.warning(
                 "HTTP response contain invalid_request error code",
                 extra={'url': response.url, 'status_code': response.status_code,
-                       'response_body': response_json, 'request_body': response.request.json}
+                       'response_body': response_json}
             )
             raise InvalidRequestError(error_description, response)
 
