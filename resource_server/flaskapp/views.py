@@ -2,9 +2,9 @@ import logging
 
 from flask import Flask, jsonify, request
 
-from timer.service import TimerService
-from apis.exceptions import InvalidAccessTokenError, AccessTokenExpiredError
+import apis.auth
 from timer.exceptions import PermissionDeniedError
+from timer.service import TimerService
 
 logger = logging.getLogger(__name__)
 
@@ -53,17 +53,17 @@ class Handler:
 
 
 def register_error_handlers(flask_app: Flask) -> None:
-    flask_app.errorhandler(InvalidAccessTokenError)(handle_invalid_access_token)
-    flask_app.errorhandler(AccessTokenExpiredError)(handle_access_token_expired)
+    flask_app.errorhandler(apis.auth.InvalidAccessTokenError)(handle_invalid_access_token)
+    flask_app.errorhandler(apis.auth.AccessTokenExpiredError)(handle_access_token_expired)
     flask_app.errorhandler(PermissionDeniedError)(handle_permission_denied)
     flask_app.errorhandler(BadAuthorizationHeader)(handle_bad_authorization_header)
 
 
-def handle_invalid_access_token(error: InvalidAccessTokenError):
+def handle_invalid_access_token(error: apis.auth.InvalidAccessTokenError):
     return error_response(ERROR_INVALID_ACCESS_TOKEN, str(error), 401)
 
 
-def handle_access_token_expired(error: AccessTokenExpiredError):
+def handle_access_token_expired(error: apis.auth.AccessTokenExpiredError):
     return error_response(ERROR_ACCESS_TOKEN_EXPIRED, str(error), 401)
 
 
@@ -72,6 +72,7 @@ def handle_permission_denied(error: PermissionDeniedError):
 
 
 def handle_bad_authorization_header(error: BadAuthorizationHeader):
+    logger.warning("Can't retrieve access token from HTTP headers", extra={'error': error})
     return error_response(ERROR_INVALID_REQUEST, str(error), 400)
 
 

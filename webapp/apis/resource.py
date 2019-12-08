@@ -27,7 +27,7 @@ class ResourceAPI(BaseAPIClient):
         current_time = response_json.get('current_time')
         if not current_time or type(current_time) != str:
             logger.warning(
-                "HTTP json body doesn't contain current_time field or wrong type",
+                "HTTP json body doesn't contain 'current_time' field or wrong type",
                 extra={'url': resp.url, 'status_code': resp.status_code,
                        'response_body': response_json}
             )
@@ -45,7 +45,7 @@ class ResourceAPI(BaseAPIClient):
         epoch_time = response_json.get('epoch_time')
         if not epoch_time or type(epoch_time) != int:
             logger.warning(
-                "HTTP json body doesn't contain epoch_time field or wrong type",
+                "HTTP json body doesn't contain 'epoch_time' field or wrong type",
                 extra={'url': resp.url, 'status_code': resp.status_code,
                        'response_body': response_json}
             )

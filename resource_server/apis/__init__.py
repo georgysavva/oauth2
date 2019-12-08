@@ -1,13 +1,7 @@
-import json
 import logging
-import os
-import sys
-from typing import Optional, List, Dict
+from typing import Optional
 
 import requests
-
-from apis.exceptions import IncorrectResponseError, InvalidRequestError
-import jsonschema
 
 logger = logging.getLogger(__name__)
 
@@ -18,82 +12,31 @@ ERROR_CODE_INVALID_REQUEST = 'invalid_request'
 # because it used in both resource_server and webapp services.
 class BaseAPIClient:
     api_version = 'v1'
-    json_schemas_dir = 'json_schemas'
-    schema_names: Optional[List[str]] = None
 
     def __init__(self, api_base_url: str):
         self._api_base_url = api_base_url
-        if self.json_schemas_dir and self.schema_names:
-            abs_schemas_dir_path = self._build_abs_path_to_schemas_dir()
-            self._json_schemas = self._load_schemas(abs_schemas_dir_path)
-        else:
-            self._json_schemas = None
 
-    def _build_abs_path_to_schemas_dir(self) -> str:
-        # BaseAPIClient doesn't know the location of the actual (children) classes
-        # It needs to get the real children module instead of its own.
-        actual_module = sys.modules[self.__class__.__module__]
-        actual_module_path = os.path.abspath(actual_module.__file__)
-        actual_package_path = os.path.dirname(actual_module_path)
-        abs_path_to_schemas_dir = os.path.abspath(
-            os.path.join(actual_package_path, self.json_schemas_dir)
-        )
-        return abs_path_to_schemas_dir
-
-    def _load_schemas(self, abs_schemas_dir_path: str) -> Optional[Dict[str, dict]]:
-        if not self.schema_names:
-            return
-        loaded_schemas = {}
-        for schema_name in self.schema_names:
-            schema_path = os.path.join(abs_schemas_dir_path, schema_name + '.json')
-            try:
-                with open(schema_path) as f:
-                    schema_data = json.load(f)
-            except Exception as e:
-                raise RuntimeError(f"Can't load json schema from file {schema_path}: {e}") from e
-            loaded_schemas[schema_name] = schema_data
-        return loaded_schemas
-
-    def _process_response(self, response: requests.Response, schema_name: Optional[str] = None,
-                          json_body_required: bool = True) -> dict:
+    def _process_response(self, response: requests.Response, json_body_required: bool = True
+                          ) -> dict:
         try:
             response_json = response.json()
         except ValueError:
             response_json = None
         self._raise_error_if_necessary(response, response_json)
         response.raise_for_status()
-        return self._validate_response(response, response_json, json_body_required, schema_name)
+        return self._validate_response(response, response_json, json_body_required)
 
-    def _validate_response(self, response: requests.Response, response_json: dict,
-                           json_body_required: bool = True,
-                           schema_name: Optional[str] = None) -> dict:
-
-        if (json_body_required or schema_name) and not response_json:
+    @staticmethod
+    def _validate_response(response: requests.Response, response_json: dict,
+                           json_body_required: bool = True) -> dict:
+        if json_body_required and not response_json:
+            logger.warning(
+                "HTTP response has empty json body",
+                extra={'url': response.url, 'status_code': response.status_code,
+                       'response_body': response.text}
+            )
             raise IncorrectResponseError("Empty json body", response)
-        if schema_name:
-            if self._json_schemas is None:
-                # Further improvement: use some custom exception class for those type of errors.
-                raise RuntimeError(f"Json schemas were not loaded you can't use 'schema_name' arg")
-            try:
-                validation_schema = self._json_schemas[schema_name]
-            except KeyError as e:
-                loaded_schema_names = list(self._json_schemas.keys())
-                raise RuntimeError(
-                    f"Json schema {schema_name} not found in loaded schemas: {loaded_schema_names}"
-                ) from e
-            try:
-                jsonschema.validate(response_json, validation_schema)
-            except jsonschema.ValidationError as e:
-                logger.warning(
-                    "HTTP response failed json schema validation",
-                    extra={
-                        'url': response.url, 'status_code': response.status_code,
-                        'response_body': response_json, 'json_schema': schema_name,
-                        'error': e.message
-                    }
-                )
-                raise IncorrectResponseError(f"Response body validation failed: {e.message}",
-                                             response) from e
+
         return response_json
 
     def _raise_error_if_necessary(self, response: requests.Response,
@@ -112,3 +55,17 @@ class BaseAPIClient:
 
     def _build_full_url(self, endpoint: str) -> str:
         return f'{self._api_base_url}/{self.api_version}/{endpoint}'
+
+
+class APIError(Exception):
+    def __init__(self, message, response, *args):
+        self.response = response
+        super().__init__(message, *args)
+
+
+class InvalidRequestError(APIError):
+    pass
+
+
+class IncorrectResponseError(APIError):
+    pass

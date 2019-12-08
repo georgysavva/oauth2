@@ -98,7 +98,7 @@ class Oauth2Service:
         try:
             payload = jwt.decode(token, self._jwt_secret, algorithms=[self.jwt_algorithm])
         except jwt.ExpiredSignatureError as e:
-            logger.info("JWT token expired: %s", e)
+            logger.warning("JWT token expired: %s", e)
             raise exceptions.AccessTokenExpiredError("Access token has expired")
         except jwt.InvalidTokenError as e:
             logger.warning("JWT token decoding failed", extra={'error': e})
