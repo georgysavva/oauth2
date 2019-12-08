@@ -3,8 +3,6 @@ from typing import Optional
 
 import requests
 
-from apis.exceptions import IncorrectResponseError, InvalidRequestError
-
 logger = logging.getLogger(__name__)
 
 ERROR_CODE_INVALID_REQUEST = 'invalid_request'
@@ -57,3 +55,17 @@ class BaseAPIClient:
 
     def _build_full_url(self, endpoint: str) -> str:
         return f'{self._api_base_url}/{self.api_version}/{endpoint}'
+
+
+class APIError(Exception):
+    def __init__(self, message, response, *args):
+        self.response = response
+        super().__init__(message, *args)
+
+
+class InvalidRequestError(APIError):
+    pass
+
+
+class IncorrectResponseError(APIError):
+    pass

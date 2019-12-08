@@ -2,7 +2,7 @@ import logging
 
 from flask import Flask
 
-from apis import exceptions
+import apis.resource
 from apis.auth import AuthAPI
 from apis.resource import ResourceAPI
 
@@ -54,12 +54,12 @@ class Handler:
 
 
 def register_error_handlers(flask_app: Flask) -> None:
-    flask_app.errorhandler(exceptions.ResourceAuthorizationError)(
+    flask_app.errorhandler(apis.resource.ResourceAuthorizationError)(
         handle_resource_authorization_error)
 
 
 # For now we show the error message as is.
 # Without translating it in something that would non-technical user understands.
-def handle_resource_authorization_error(error: exceptions.ResourceAuthorizationError):
+def handle_resource_authorization_error(error: apis.resource.ResourceAuthorizationError):
     logger.warning("Resource server authorization failed", extra={'error': error})
-    return str(error), 403 if isinstance(error, exceptions.PermissionDeniedError) else 401
+    return str(error), 403 if isinstance(error, apis.resource.PermissionDeniedError) else 401

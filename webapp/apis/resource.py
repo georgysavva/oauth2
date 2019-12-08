@@ -3,11 +3,7 @@ from typing import Optional
 
 import requests
 
-from apis import BaseAPIClient
-from apis.exceptions import (
-    IncorrectResponseError, InvalidAccessTokenError,
-    AccessTokenExpiredError, PermissionDeniedError
-)
+from apis import BaseAPIClient, IncorrectResponseError, APIError
 
 logger = logging.getLogger(__name__)
 
@@ -74,3 +70,19 @@ class ResourceAPI(BaseAPIClient):
     @staticmethod
     def _build_bearer_header(access_token: str) -> dict:
         return {'Authorization': f'Bearer {access_token}'}
+
+
+class ResourceAuthorizationError(APIError):
+    pass
+
+
+class InvalidAccessTokenError(ResourceAuthorizationError):
+    pass
+
+
+class AccessTokenExpiredError(ResourceAuthorizationError):
+    pass
+
+
+class PermissionDeniedError(ResourceAuthorizationError):
+    pass
