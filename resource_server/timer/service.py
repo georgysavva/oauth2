@@ -49,8 +49,7 @@ class TimerService:
                 "Resource not in the token scope", extra={'scope': scope, 'resource': resource}
             )
             raise PermissionDeniedError(
-                f"Access to resource {resource} denied, out of the token scope",
-                resource
+                f"Access to resource {resource} denied, out of the token scope"
             )
 
     @staticmethod

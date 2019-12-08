@@ -23,7 +23,7 @@ valid_access_token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJib2IiLCJpc
         ('current_time', '2019-12-06T01:00:01+00:00'),
         ('epoch_time', 1575594001)
     ])
-def test_get_current_time_and_epoch_smoke(flask_client, time_resource_name, result):
+def test_get_current_time_and_epoch_time_smoke(flask_client, time_resource_name, result):
     def _issue_token_http_request_matcher(request):
         return request.json() == {
             'grant_type': 'password',

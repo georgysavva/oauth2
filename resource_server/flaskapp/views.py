@@ -39,7 +39,7 @@ class Handler:
             raise BadAuthorizationHeader("Authorization header is missing")
         if not header.startswith('Bearer '):
             raise BadAuthorizationHeader(
-                f"Authorization header has invalid format, it must start with 'Bearer': {header}"
+                f"Authorization header has incorrect format, it must start with 'Bearer': {header}"
             )
         return header[len('Bearer '):]
 

@@ -18,14 +18,16 @@ class AuthAPI(BaseAPIClient):
 
     def get_access_token_info(self, access_token: str) -> models.AccessTokenInfo:
         url = self._build_full_url(endpoint='token')
-        resp = requests.post(url, json={'access_token': access_token})
+        resp = requests.get(url, json={'access_token': access_token})
+        # Further improvement: pass json schema to the base method,
+        # to have automated data validation.
         response_json = self._process_response(resp)
-        user_id, scope = self._validate_token_info_response(resp, response_json)
+        user_id, scope = self.validate_token_info_response(resp, response_json)
         return models.AccessTokenInfo(user_id, scope)
 
     @staticmethod
-    def _validate_token_info_response(response: requests.Response,
-                                      response_json: dict) -> Tuple[str, list]:
+    def validate_token_info_response(response: requests.Response,
+                                     response_json: dict) -> Tuple[str, list]:
         log_ctx = {'url': response.url, 'status_code': response.status_code,
                    'response_body': response_json}
         user_id = response_json.get('user_id')
