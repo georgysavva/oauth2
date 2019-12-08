@@ -22,7 +22,7 @@ class ResourceAPI(BaseAPIClient):
 
     def get_current_time(self, access_token: str) -> str:
         url = self._build_full_url(endpoint='current_time')
-        resp = requests.get(url, header=self._build_bearer_header(access_token))
+        resp = requests.get(url, headers=self._build_bearer_header(access_token))
 
         # Further improvement: pass json schema to the base method,
         # to have automated data validation.
@@ -31,16 +31,16 @@ class ResourceAPI(BaseAPIClient):
         current_time = response_json.get('current_time')
         if not current_time or type(current_time) != str:
             logger.warning(
-                "HTTP json body doesn't contain current_time field",
+                "HTTP json body doesn't contain current_time field or wrong type",
                 extra={'url': resp.url, 'status_code': resp.status_code,
                        'json_body': response_json}
             )
-            raise IncorrectResponseError("current_time field is missing",resp)
+            raise IncorrectResponseError("'current_time' field is missing or wrong type", resp)
         return current_time
 
     def get_epoch_time(self, access_token: str) -> int:
         url = self._build_full_url(endpoint='epoch_time')
-        resp = requests.get(url, header=self._build_bearer_header(access_token))
+        resp = requests.get(url, headers=self._build_bearer_header(access_token))
 
         # Further improvement: pass json schema to the base method,
         # to have automated data validation.
@@ -49,11 +49,11 @@ class ResourceAPI(BaseAPIClient):
         epoch_time = response_json.get('epoch_time')
         if not epoch_time or type(epoch_time) != int:
             logger.warning(
-                "HTTP json body doesn't contain epoch_time field",
+                "HTTP json body doesn't contain epoch_time field or wrong type",
                 extra={'url': resp.url, 'status_code': resp.status_code,
                        'json_body': response_json}
             )
-            raise IncorrectResponseError("epoch_time field is missing", resp)
+            raise IncorrectResponseError("'epoch_time' field is missing or wrong type", resp)
         return epoch_time
 
     def _raise_error_if_necessary(self, response: requests.Response,
@@ -68,6 +68,8 @@ class ResourceAPI(BaseAPIClient):
             raise AccessTokenExpiredError(error_description, response)
         if error_code == ERROR_CODE_PERMISSION_DENIED:
             raise PermissionDeniedError(error_description, response)
+
+        super()._raise_error_if_necessary(response, response_json)
 
     @staticmethod
     def _build_bearer_header(access_token: str) -> dict:

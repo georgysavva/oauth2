@@ -32,7 +32,7 @@ class Oauth2Service:
                 "Token request has unsupported grant type", extra={'grant_type': grant_type}
             )
             raise exceptions.UnsupportedGrantTypeError(
-                f"Unsupported grant type. "
+                f"Unsupported grant type '{grant_type}'. "
                 f"Server only supports '{models.GRANT_TYPE_PASSWORD}' grant type."
             )
         application = self._apps_repo.get(client_id)

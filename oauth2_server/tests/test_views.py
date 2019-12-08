@@ -9,7 +9,7 @@ def issue_token_valid_request_data():
         'client_id': '1234',
         'client_secret': 'qwerty',
         'username': 'bob',
-        'password': 'pass',
+        'password': 'bob-pass',
         'grant_type': 'password'
     }
 
@@ -19,7 +19,7 @@ def test_issue_token_and_get_token_info_smoke(flask_client):
     resp = flask_client.post('/v1/token', json=issue_token_valid_request_data())
     assert resp.status_code == 200
     assert resp.json == {
-        'access_token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJib2IiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjUwMDEvdjEvdG9rZW4iLCJjaWQiOiIxMjM0IiwiaWF0IjoxNTc1NTk0MDAwLCJleHAiOjE1NzU1OTQwMDUsInNjb3BlIjoiY3VycmVudF90aW1lIGVwb2NoX3RpbWUifQ.Ncs1HU4nbO7nYr1U9WCA59VsBMzF4qrcHc0BzLwsLIE'
+        'access_token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJib2IiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjUwMDEvdjEvdG9rZW4iLCJjaWQiOiIxMjM0IiwiaWF0IjoxNTc1NTk0MDAwLCJleHAiOjE1NzU1OTQwMDUsInNjb3BlIjoiY3VycmVudF90aW1lIGVwb2NoX3RpbWUifQ.Ncs1HU4nbO7nYr1U9WCA59VsBMzF4qrcHc0BzLwsLIE'  # noqa
     }
     token = resp.json['access_token']
     resp = flask_client.get('/v1/token', json={'access_token': token})
@@ -31,7 +31,31 @@ def test_issue_token_and_get_token_info_smoke(flask_client):
         'issued_at': 1575594000,
         'expires_at': 1575594005,
         'scope': ['current_time', 'epoch_time']
+    }
 
+
+@freeze_time("2019-12-06 01:00:00")
+@pytest.mark.parametrize('username,password',
+                         [('bob', 'alice-pass'), ('alice', 'bob-pass'), ('alice', 'alice-pass')])
+def test_issue_token_works_regardless_of_username_and_pass(flask_client, username, password):
+    issue_token_request_data = issue_token_valid_request_data()
+    issue_token_request_data['username'] = username
+    issue_token_request_data['password'] = password
+    resp = flask_client.post('/v1/token', json=issue_token_request_data)
+    assert resp.status_code == 200
+    assert resp.json == {
+        'access_token': mock.ANY
+    }
+    token = resp.json['access_token']
+    resp = flask_client.get('/v1/token', json={'access_token': token})
+    assert resp.status_code == 200
+    assert resp.json == {
+        'client_id': '1234',
+        'user_id': username,
+        'issuer_url': 'http://localhost:5001/v1/token',
+        'issued_at': 1575594000,
+        'expires_at': 1575594005,
+        'scope': ['current_time', 'epoch_time']
     }
 
 
@@ -66,7 +90,8 @@ def test_unsupported_grant_type(flask_client):
     assert resp.status_code == 400
     assert resp.json == {
         'error': 'unsupported_grant_type',
-        'error_description': "Unsupported grant type. Server only supports 'password' grant type.",
+        'error_description': "Unsupported grant type 'code'. "
+                             "Server only supports 'password' grant type.",
     }
 
 

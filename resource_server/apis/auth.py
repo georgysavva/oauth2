@@ -35,3 +35,5 @@ class AuthAPI(BaseAPIClient):
             raise InvalidAccessTokenError(error_description, response)
         if error_code == ERROR_CODE_ACCESS_TOKEN_EXPIRED:
             raise AccessTokenExpiredError(error_description, response)
+
+        super()._raise_error_if_necessary(response, response_json)

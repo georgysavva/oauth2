@@ -1,6 +1,6 @@
 from apis.auth import AuthAPI
 from models import models
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List
 from timer.exceptions import PermissionDeniedError
 import logging
@@ -18,7 +18,7 @@ class TimerService:
         # and pass validated data to the actual functions with business logic.
         token_info = self._get_token_info(access_token)
         self._check_scope(token_info.scope, 'current_time')
-        return datetime.utcnow()
+        return self._get_utc_now()
 
     def get_epoch_time(self, access_token: str) -> int:
         # Further improvement:
@@ -26,7 +26,7 @@ class TimerService:
         # and pass validated data to the actual functions with business logic.
         token_info = self._get_token_info(access_token)
         self._check_scope(token_info.scope, 'epoch_time')
-        return int(datetime.utcnow().timestamp())
+        return int(self._get_utc_now().timestamp())
 
     def _get_token_info(self, access_token: str) -> models.AccessTokenInfo:
         return self._auth_api.get_access_token_info(access_token)
@@ -41,3 +41,7 @@ class TimerService:
                 f"Access to resource {resource} denied, out of the token scope",
                 resource
             )
+
+    @staticmethod
+    def _get_utc_now() -> datetime:
+        return datetime.now(timezone.utc)

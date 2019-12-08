@@ -39,7 +39,8 @@ class Handler:
             raise BadAuthorizationHeader("Authorization header is missing")
         if not header.startswith('Bearer '):
             raise BadAuthorizationHeader(
-                "Authorization header has invalid format: it must start with 'Bearer")
+                f"Authorization header has invalid format, it must start with 'Bearer': {header}"
+            )
         return header[len('Bearer '):]
 
     def register_routes(self, flask_app: Flask) -> None:

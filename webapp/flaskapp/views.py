@@ -22,7 +22,7 @@ class Handler:
     def get_epoch_time(self):
         access_token = self._get_access_token()
         result = self._resource_api.get_epoch_time(access_token)
-        return result
+        return str(result)
 
     def _get_access_token(self) -> str:
         access_token = self._auth_client.request_access_token(grant_type='password', username='bob',
@@ -39,12 +39,17 @@ class Handler:
 
 
 def register_error_handlers(flask_app: Flask) -> None:
+    flask_app.errorhandler(exceptions.InvalidAccessTokenError)(handle_invalid_access_token)
     flask_app.errorhandler(exceptions.AccessTokenExpiredError)(handle_access_token_expired)
     flask_app.errorhandler(exceptions.PermissionDeniedError)(handle_permission_denied)
 
 
 # For now we show the error message as is.
 # Without translating it in something that would non-technical user understands.
+def handle_invalid_access_token(error: exceptions.InvalidAccessTokenError):
+    return str(error), 401
+
+
 def handle_access_token_expired(error: exceptions.AccessTokenExpiredError):
     return str(error), 401
 

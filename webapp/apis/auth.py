@@ -27,9 +27,9 @@ class AuthAPI(BaseAPIClient):
         access_token = response_json.get('access_token')
         if not access_token or type(access_token) != str:
             logger.warning(
-                "HTTP response body doesn't contain access_token field",
+                "HTTP response body doesn't contain access_token field in proper type",
                 extra={'url': resp.url, 'status_code': resp.status_code,
                        'response_body': response_json}
             )
-            raise IncorrectResponseError("access_token field is missing", resp)
+            raise IncorrectResponseError("'access_token' field is missing or wrong type", resp)
         return access_token
