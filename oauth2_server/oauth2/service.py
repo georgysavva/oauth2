@@ -27,6 +27,10 @@ class Oauth2Service:
 
     def issue_token(self, grant_type: str, client_id: str, client_secret: str,
                     username: str) -> str:
+        logger.info(
+            "Issue token request received",
+            extra={'grant_type': grant_type, 'client_id': client_id, 'username': username}
+        )
         if grant_type != models.GRANT_TYPE_PASSWORD:
             logger.warning(
                 "Token request has unsupported grant type", extra={'grant_type': grant_type}
@@ -49,15 +53,23 @@ class Oauth2Service:
         # Now we should check username and password and found the corresponding user in the db
         # But since we grant access token to anyone we won't do that
         user_id = username
-
-        access_token = self._create_token(user_id, client_id, self._users_scope)
+        scope = self._users_scope
+        logger.info(
+            "Request validation passed, creating access token",
+            extra={'user_id': user_id, 'client_id': client_id, 'scope': scope}
+        )
+        access_token = self._create_token(user_id, client_id, scope)
+        logger.info("Access token created successfully")
         return access_token
 
     def get_token_info(self, token: str) -> models.AccessTokenInfo:
+        logger.info("Get token info request received")
+        logger.info("Decoding JWT access token")
         token_info = self._decode_jwt_token(token)
         # We don't need to check expires_at and issued_at here,
         # because it was check by the JWT implementation.
         # So can just return the token info
+        logger.info("Access token info obtained", extra={'token_info': token_info})
         return token_info
 
     def _create_token(self, user_id: str, client_id: str, scope: List[str]) -> str:
@@ -65,6 +77,7 @@ class Oauth2Service:
         expires_at = issued_at + self._token_lifetime
         token_info = models.AccessTokenInfo(user_id, client_id, self._issuer_url, issued_at,
                                             expires_at, scope)
+        logger.info("Encoding access token into JWT format", extra={'token_info': token_info})
         token = self._encode_jwt_token(token_info)
         return token
 
