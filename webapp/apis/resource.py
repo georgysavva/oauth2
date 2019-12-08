@@ -33,7 +33,7 @@ class ResourceAPI(BaseAPIClient):
             logger.warning(
                 "HTTP json body doesn't contain current_time field or wrong type",
                 extra={'url': resp.url, 'status_code': resp.status_code,
-                       'json_body': response_json}
+                       'response_body': response_json}
             )
             raise IncorrectResponseError("'current_time' field is missing or wrong type", resp)
         return current_time
@@ -51,7 +51,7 @@ class ResourceAPI(BaseAPIClient):
             logger.warning(
                 "HTTP json body doesn't contain epoch_time field or wrong type",
                 extra={'url': resp.url, 'status_code': resp.status_code,
-                       'json_body': response_json}
+                       'response_body': response_json}
             )
             raise IncorrectResponseError("'epoch_time' field is missing or wrong type", resp)
         return epoch_time

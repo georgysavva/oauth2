@@ -12,13 +12,17 @@ class IncorrectResponseError(APIError):
     pass
 
 
-class InvalidAccessTokenError(APIError):
+class ResourceAuthorizationError(APIError):
     pass
 
 
-class AccessTokenExpiredError(APIError):
+class InvalidAccessTokenError(ResourceAuthorizationError):
     pass
 
 
-class PermissionDeniedError(APIError):
+class AccessTokenExpiredError(ResourceAuthorizationError):
+    pass
+
+
+class PermissionDeniedError(ResourceAuthorizationError):
     pass

@@ -26,13 +26,19 @@ class BaseAPIClient:
             response_json = None
         self._raise_error_if_necessary(response, response_json)
         response.raise_for_status()
+        return self._validate_response(response, response_json, json_body_required)
+
+    @staticmethod
+    def _validate_response(response: requests.Response, response_json: dict,
+                           json_body_required: bool = True) -> dict:
         if json_body_required and not response_json:
             logger.warning(
                 "HTTP response has empty json body",
                 extra={'url': response.url, 'status_code': response.status_code,
-                       'body': response.text}
+                       'response_body': response.text}
             )
             raise IncorrectResponseError("Empty json body", response)
+
         return response_json
 
     def _raise_error_if_necessary(self, response: requests.Response,
@@ -45,7 +51,7 @@ class BaseAPIClient:
             logger.warning(
                 "HTTP bad request",
                 extra={'url': response.url, 'status_code': response.status_code,
-                       'json_body': response_json}
+                       'response_body': response_json}
             )
             raise InvalidRequestError(error_description, response)
 

@@ -9,6 +9,11 @@ from apis.resource import ResourceAPI
 logger = logging.getLogger(__name__)
 
 
+# Further improvement: Move business logic to a separate class (Service),
+# that knows nothing about http transport layer and flask
+# As it done in oauth2_server and resource_server projects
+# But since it's not a real web application and the logic layer is really thin,
+# it's ok to put it here.
 class Handler:
     def __init__(self, auth_api: AuthAPI, resource_api: ResourceAPI):
         self._auth_client = auth_api
@@ -16,17 +21,27 @@ class Handler:
 
     def get_current_time(self):
         access_token = self._get_access_token()
+        logger.info("Requesting current time resource")
         result = self._resource_api.get_current_time(access_token)
+        logger.info("Resource current time obtained", extra={'current_time': result})
         return result
 
     def get_epoch_time(self):
         access_token = self._get_access_token()
+        logger.info("Requesting epoch time resource")
         result = self._resource_api.get_epoch_time(access_token)
+        logger.info("Resource epoch time obtained", extra={'epoch_time': result})
         return str(result)
 
     def _get_access_token(self) -> str:
-        access_token = self._auth_client.request_access_token(grant_type='password', username='bob',
-                                                              password='bob-pass')
+        grant_type = 'password'
+        username = 'bob'
+        password = 'bob-pass'
+        logger.info(
+            "Requesting access token from the oauth2 server",
+            extra={'grant_type': grant_type, 'username': username, 'password': password}
+        )
+        access_token = self._auth_client.request_access_token(grant_type, username, password)
         return access_token
 
     def register_routes(self, flask_app: Flask) -> None:
@@ -39,20 +54,12 @@ class Handler:
 
 
 def register_error_handlers(flask_app: Flask) -> None:
-    flask_app.errorhandler(exceptions.InvalidAccessTokenError)(handle_invalid_access_token)
-    flask_app.errorhandler(exceptions.AccessTokenExpiredError)(handle_access_token_expired)
-    flask_app.errorhandler(exceptions.PermissionDeniedError)(handle_permission_denied)
+    flask_app.errorhandler(exceptions.ResourceAuthorizationError)(
+        handle_resource_authorization_error)
 
 
 # For now we show the error message as is.
 # Without translating it in something that would non-technical user understands.
-def handle_invalid_access_token(error: exceptions.InvalidAccessTokenError):
-    return str(error), 401
-
-
-def handle_access_token_expired(error: exceptions.AccessTokenExpiredError):
-    return str(error), 401
-
-
-def handle_permission_denied(error: exceptions.PermissionDeniedError):
-    return str(error), 403
+def handle_resource_authorization_error(error: exceptions.ResourceAuthorizationError):
+    logger.warning("Resource server authorization failed", extra={'error': error})
+    return str(error), 403 if isinstance(error, exceptions.PermissionDeniedError) else 401
