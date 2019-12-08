@@ -9,9 +9,11 @@ from flaskapp import views
 from timer.service import TimerService
 
 
-def create_auth_api_client(auth_api_base_url: Optional[str] = None) -> AuthAPI:
+def create_auth_api_client(auth_api_base_url: Optional[str] = None,
+                           http_request_timeout: Optional[int] = None) -> AuthAPI:
     auth_api_base_url = auth_api_base_url or config.AUTH_API_BASE_URL
-    auth_api = AuthAPI(auth_api_base_url)
+    http_request_timeout = http_request_timeout or config.HTTP_REQUEST_TIMEOUT
+    auth_api = AuthAPI(auth_api_base_url, http_request_timeout)
     return auth_api
 
 

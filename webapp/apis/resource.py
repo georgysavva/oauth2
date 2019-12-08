@@ -13,12 +13,14 @@ ERROR_CODE_PERMISSION_DENIED = 'permission_denied'
 
 
 class ResourceAPI(BaseAPIClient):
-    def __init__(self, resource_api_base_url: str):
+    def __init__(self, resource_api_base_url: str, http_timeout: int):
+        self._http_timeout = http_timeout  # in seconds
         super().__init__(resource_api_base_url)
 
     def get_current_time(self, access_token: str) -> str:
         url = self._build_full_url(endpoint='current_time')
-        resp = requests.get(url, headers=self._build_bearer_header(access_token))
+        resp = requests.get(url, headers=self._build_bearer_header(access_token),
+                            timeout=self._http_timeout)
 
         # Further improvement: pass json schema to the base method,
         # to have automated data validation.
@@ -36,7 +38,8 @@ class ResourceAPI(BaseAPIClient):
 
     def get_epoch_time(self, access_token: str) -> int:
         url = self._build_full_url(endpoint='epoch_time')
-        resp = requests.get(url, headers=self._build_bearer_header(access_token))
+        resp = requests.get(url, headers=self._build_bearer_header(access_token),
+                            timeout=self._http_timeout)
 
         # Further improvement: pass json schema to the base method,
         # to have automated data validation.

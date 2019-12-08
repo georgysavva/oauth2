@@ -13,12 +13,13 @@ ERROR_CODE_ACCESS_TOKEN_EXPIRED = 'access_token_expired'
 
 
 class AuthAPI(BaseAPIClient):
-    def __init__(self, auth_api_base_url: str):
+    def __init__(self, auth_api_base_url: str, http_timeout: int):
+        self._http_timeout = http_timeout  # in seconds
         super().__init__(auth_api_base_url)
 
     def get_access_token_info(self, access_token: str) -> models.AccessTokenInfo:
         url = self._build_full_url(endpoint='token')
-        resp = requests.get(url, json={'access_token': access_token})
+        resp = requests.get(url, json={'access_token': access_token}, timeout=self._http_timeout)
         # Further improvement: pass json schema to the base method,
         # to have automated data validation.
         response_json = self._process_response(resp)

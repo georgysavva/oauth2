@@ -11,18 +11,22 @@ from flaskapp import views
 
 def create_auth_api_client(
     auth_api_base_url: Optional[str] = None,
-    client_id: Optional[str] = None, client_secret: Optional[str] = None
+    client_id: Optional[str] = None, client_secret: Optional[str] = None,
+    http_request_timeout: Optional[int] = None
 ) -> AuthAPI:
     auth_api_base_url = auth_api_base_url or config.AUTH_API_BASE_URL
     client_id = client_id or config.CLIENT_ID
     client_secret = client_secret or config.CLIENT_SECRET
-    auth_api = AuthAPI(auth_api_base_url, client_id, client_secret)
+    http_request_timeout = http_request_timeout or config.HTTP_REQUEST_TIMEOUT
+    auth_api = AuthAPI(auth_api_base_url, client_id, client_secret, http_request_timeout)
     return auth_api
 
 
-def create_resource_api_client(resource_api_base_url: Optional[str] = None) -> ResourceAPI:
+def create_resource_api_client(resource_api_base_url: Optional[str] = None,
+                               http_request_timeout: Optional[int] = None) -> ResourceAPI:
     resource_api_base_url = resource_api_base_url or config.RESOURCE_API_BASE_URL
-    resource_api = ResourceAPI(resource_api_base_url)
+    http_request_timeout = http_request_timeout or config.HTTP_REQUEST_TIMEOUT
+    resource_api = ResourceAPI(resource_api_base_url, http_request_timeout)
     return resource_api
 
 

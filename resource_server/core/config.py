@@ -6,6 +6,8 @@ USE_JSON_LOGGER_FORMATTER = False
 
 AUTH_API_BASE_URL = 'http://localhost:5001'
 
+HTTP_REQUEST_TIMEOUT = 5  # in seconds
+
 UNITTEST_ENV = 'pytest' in os.path.basename(sys.argv[0])
 
 # Unittests result must not depend on values from the config file,

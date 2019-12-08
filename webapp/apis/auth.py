@@ -8,9 +8,11 @@ logger = logging.getLogger(__name__)
 
 
 class AuthAPI(BaseAPIClient):
-    def __init__(self, auth_api_base_url: str, client_id: str, client_secret: str):
+    def __init__(self, auth_api_base_url: str, client_id: str, client_secret: str,
+                 http_timeout: int):
         self._client_id = client_id
         self._client_secret = client_secret
+        self._http_timeout = http_timeout  # in seconds
         super().__init__(auth_api_base_url)
 
     def request_access_token(self, grant_type: str, username: str, password: str) -> str:
@@ -19,7 +21,7 @@ class AuthAPI(BaseAPIClient):
             'grant_type': grant_type, 'client_id': self._client_id,
             'client_secret': self._client_secret, 'username': username,
             'password': password
-        })
+        }, timeout=self._http_timeout)
         # Further improvement: pass json schema to the base method,
         # to have automated data validation.
         # Now we have only one field so we can check it manually.
