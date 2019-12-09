@@ -46,8 +46,10 @@ all information contained in the JWT payload.
 
 
 # Run locally
-You will need `docker` and `docker-compose` installed. 
+You will need `docker` and `docker-compose` installed.
+
 In the project root type: `docker-compose up`
+
 This will build 3 docker images for each service and start 3 containers. After that you can call the webapp service:
 
 `curl http://localhost:5003/current_time`
@@ -57,8 +59,11 @@ This will build 3 docker images for each service and start 3 containers. After t
 
 # Run tests
 You will need `docker` and `docker-compose` installed. 
+
 In the project root type: `docker-compose build` to build a docker image for each service, if you didn’t build them before.
+
 After that in the project root run:
+
 ` ./run-unittests-docker.sh`
 
 
