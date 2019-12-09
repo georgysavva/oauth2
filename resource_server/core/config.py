@@ -2,9 +2,9 @@ import logging.config
 import os
 import sys
 
-USE_JSON_LOGGER_FORMATTER = False
+USE_JSON_LOGGER_FORMATTER = True
 
-AUTH_API_BASE_URL = 'http://localhost:5001'
+AUTH_API_BASE_URL = 'http://oauth2-server:8000'
 
 HTTP_REQUEST_TIMEOUT = 5  # in seconds
 

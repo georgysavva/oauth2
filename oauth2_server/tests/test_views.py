@@ -20,7 +20,7 @@ def test_issue_token_and_get_token_info_smoke(flask_client):
     resp = flask_client.post('/v1/token', json=issue_token_valid_request_data())
     assert resp.status_code == 200
     assert resp.json == {
-        'access_token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJib2IiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjUwMDEvdjEvdG9rZW4iLCJjaWQiOiIxMjM0IiwiaWF0IjoxNTc1NTk0MDAwLCJleHAiOjE1NzU1OTQwMDUsInNjb3BlIjoiY3VycmVudF90aW1lIGVwb2NoX3RpbWUifQ.Ncs1HU4nbO7nYr1U9WCA59VsBMzF4qrcHc0BzLwsLIE'  # noqa
+        'access_token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJib2IiLCJpc3MiOiJodHRwOi8vb2F1dGgyLXNlcnZlcjo4MDAwOjUwMDEvdjEvdG9rZW4iLCJjaWQiOiIxMjM0IiwiaWF0IjoxNTc1NTk0MDAwLCJleHAiOjE1NzU1OTQwMDUsInNjb3BlIjoiY3VycmVudF90aW1lIGVwb2NoX3RpbWUifQ._LudWWBavUgDlyNxEgYWYMD6Y1ofRas6JkdW8aULc7o'
     }
     token = resp.json['access_token']
     resp = flask_client.get('/v1/token', json={'access_token': token})
@@ -28,7 +28,7 @@ def test_issue_token_and_get_token_info_smoke(flask_client):
     assert resp.json == {
         'client_id': '1234',
         'user_id': 'bob',
-        'issuer_url': 'http://localhost:5001/v1/token',
+        'issuer_url': 'http://oauth2-server:8000:5001/v1/token',
         'issued_at': 1575594000,
         'expires_at': 1575594005,
         'scope': ['current_time', 'epoch_time']
@@ -53,7 +53,7 @@ def test_issue_token_works_regardless_of_username_and_pass(flask_client, usernam
     assert resp.json == {
         'client_id': '1234',
         'user_id': username,
-        'issuer_url': 'http://localhost:5001/v1/token',
+        'issuer_url': 'http://oauth2-server:8000:5001/v1/token',
         'issued_at': 1575594000,
         'expires_at': 1575594005,
         'scope': ['current_time', 'epoch_time']
@@ -143,7 +143,8 @@ def test_get_token_info_access_token_expired(flask_client):
         resp = flask_client.post('/v1/token', json=issue_token_valid_request_data())
     assert resp.status_code == 200
     assert resp.json == {
-        'access_token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJib2IiLCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjUwMDEvdjEvdG9rZW4iLCJjaWQiOiIxMjM0IiwiaWF0IjoxNTc1NTk0MDAwLCJleHAiOjE1NzU1OTQwMDUsInNjb3BlIjoiY3VycmVudF90aW1lIGVwb2NoX3RpbWUifQ.Ncs1HU4nbO7nYr1U9WCA59VsBMzF4qrcHc0BzLwsLIE',
+        'access_token': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJib2IiLCJpc3MiOiJodHRwOi8vb2F1dGgyLXNlcnZlcjo4MDAwOjUwMDEvdjEvdG9rZW4iLCJjaWQiOiIxMjM0IiwiaWF0IjoxNTc1NTk0MDAwLCJleHAiOjE1NzU1OTQwMDUsInNjb3BlIjoiY3VycmVudF90aW1lIGVwb2NoX3RpbWUifQ._LudWWBavUgDlyNxEgYWYMD6Y1ofRas6JkdW8aULc7o'
+
     }
     token = resp.json['access_token']
     with freeze_time("2019-12-06T02:00:00+00:00"):
@@ -159,7 +160,7 @@ def test_get_token_info_access_token_expired(flask_client):
 def test_get_token_info_jwt_fields_missing(flask_client, caplog, missing_field):
     jwt_payload = {
         'sub': 'bob',
-        'iss': 'http://localhost:5001/v1/token',
+        'iss': 'http://oauth2-server:8000:5001/v1/token',
         'cid': '1234',
         'iat': 1575594000,
         'exp': 1575594005,

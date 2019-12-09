@@ -1,0 +1,44 @@
+# docker-compose file for dev environment.
+#
+# This file is generated automatically from docker/docker-compose.yml.jinja2, do not
+# edit manually. To edit do:
+# - edit docker/docker-compose.yml.jinja2
+# - fab jinja_render
+# - commit generated files
+#
+
+version: "3.3"
+
+services:
+  oauth2-server:
+    ports:
+      - target: 8000
+        published: 5001
+    image: oauth2-server
+    build: ./oauth2_server/
+    volumes:
+      - ./oauth2_server/configs:/app/configs
+
+  resource-server:
+    ports:
+      - target: 8000
+        published: 5002
+    image: resource-server
+    build: ./resource_server/
+    volumes:
+      - ./resource_server/configs:/app/configs
+    depends_on:
+      - oauth2-server
+
+
+  webapp:
+    ports:
+      - target: 8000
+        published: 5003
+    image: webapp
+    build: ./webapp/
+    volumes:
+      - ./webapp/configs:/app/configs
+    depends_on:
+      - oauth2-server
+      - resource-server

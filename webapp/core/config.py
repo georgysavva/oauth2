@@ -2,13 +2,13 @@ import logging.config
 import os
 import sys
 
-USE_JSON_LOGGER_FORMATTER = False
+USE_JSON_LOGGER_FORMATTER = True
 
 CLIENT_ID = '1234'
 CLIENT_SECRET = 'qwerty'
 
-AUTH_API_BASE_URL = 'http://localhost:5001'
-RESOURCE_API_BASE_URL = 'http://localhost:5002'
+AUTH_API_BASE_URL = 'http://oauth2-server:8000'
+RESOURCE_API_BASE_URL = 'http://resource-server:8000'
 
 HTTP_REQUEST_TIMEOUT = 5  # in seconds
 
@@ -44,7 +44,7 @@ logging_conf = {
     }},
     'root': {
         'level': 'INFO',
-        'handlers': ['console']
+        'handlers': ['console'],
     }
 }
 # Further improvement: create a separate json/yaml logging config file with

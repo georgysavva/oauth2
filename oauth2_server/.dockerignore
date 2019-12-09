@@ -1,4 +1,4 @@
-__pycache__
+**/__pycache__
 *.pyc
 *.pyo
 *.pyd
@@ -8,12 +8,12 @@ env
 pip-log.txt
 .cache
 *.log
-/.git
+**/.git
 /tmp
-tests/.pytest_cache
+**/.pytest_cache
 
 
-/configs
+**/configs
 
 # Pycharm
 .idea

@@ -20,12 +20,12 @@ def test_get_current_time_and_epoch_time_smoke(flask_client, time_resource_name,
 
     with requests_mock.Mocker() as m:
         m.get(
-            'http://localhost:5001/v1/token',
+            'http://oauth2-server:8000/v1/token',
             additional_matcher=_get_token_info_http_request_matcher,
             json={
                 'client_id': '1234',
                 'user_id': 'bob',
-                'issuer_url': 'http://localhost:5001/v1/token',
+                'issuer_url': 'http://oauth2-server:8000/v1/token',
                 'issued_at': 1575594000,
                 'expires_at': 1575594005,
                 'scope': ['current_time', 'epoch_time']
@@ -72,7 +72,7 @@ def test_get_token_info_response_error_code_expected(flask_client, time_resource
                                                      error_description, status_code):
     with requests_mock.Mocker() as m:
         m.get(
-            'http://localhost:5001/v1/token', status_code=status_code,
+            'http://oauth2-server:8000/v1/token', status_code=status_code,
             json={
                 'error': error_code,
                 'error_description': error_description
@@ -93,7 +93,7 @@ def test_get_token_info_response_error_code_expected(flask_client, time_resource
 def test_get_token_info_response_error_code_invalid_request(flask_client, time_resource_name):
     with requests_mock.Mocker() as m:
         m.get(
-            'http://localhost:5001/v1/token', status_code=400,
+            'http://oauth2-server:8000/v1/token', status_code=400,
             json={
                 'error': 'invalid_request',
                 'error_description': "Something wrong with your request"
@@ -111,7 +111,7 @@ def test_get_token_info_response_error_code_invalid_request(flask_client, time_r
 def test_get_token_info_response_error_http_status_code(flask_client, time_resource_name):
     with requests_mock.Mocker() as m:
         m.get(
-            'http://localhost:5001/v1/token', status_code=500, reason='Internal error'
+            'http://oauth2-server:8000/v1/token', status_code=500, reason='Internal error'
         )
         with pytest.raises(requests.HTTPError) as exc_info:
             flask_client.get(
@@ -120,12 +120,12 @@ def test_get_token_info_response_error_http_status_code(flask_client, time_resou
             )
 
     assert str(exc_info.value) == ("500 Server Error: "
-                                   "Internal error for url: http://localhost:5001/v1/token")
+                                   "Internal error for url: http://oauth2-server:8000/v1/token")
 
 
 def test_get_token_info_response_empty_json_body(flask_client, time_resource_name):
     with requests_mock.Mocker() as m:
-        m.get('http://localhost:5001/v1/token', text='Success')
+        m.get('http://oauth2-server:8000/v1/token', text='Success')
         with pytest.raises(apis.IncorrectResponseError) as exc_info:
             flask_client.get(
                 f'/v1/{time_resource_name}',
@@ -137,7 +137,7 @@ def test_get_token_info_response_empty_json_body(flask_client, time_resource_nam
 
 def test_get_token_info_response_incorrect_json_body(flask_client, time_resource_name):
     with requests_mock.Mocker() as m:
-        m.get('http://localhost:5001/v1/token', json={'user_id': 'bob'})
+        m.get('http://oauth2-server:8000/v1/token', json={'user_id': 'bob'})
         with pytest.raises(apis.IncorrectResponseError) as exc_info:
             flask_client.get(
                 f'/v1/{time_resource_name}',
@@ -154,7 +154,7 @@ def test_time_resource_permission_denied(flask_client, time_resource_name):
     }
     token_info['scope'].remove(time_resource_name)
     with requests_mock.Mocker() as m:
-        m.get('http://localhost:5001/v1/token', json=token_info)
+        m.get('http://oauth2-server:8000/v1/token', json=token_info)
         resp = flask_client.get(
             f'/v1/{time_resource_name}',
             headers={'Authorization': f'Bearer {valid_access_token}'}

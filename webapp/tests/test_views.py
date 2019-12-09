@@ -24,12 +24,12 @@ def test_get_current_time_and_epoch_time_smoke(flask_client, time_resource_name,
 
     with requests_mock.Mocker() as m:
         m.post(
-            'http://localhost:5001/v1/token',
+            'http://oauth2-server:8000/v1/token',
             additional_matcher=_issue_token_http_request_matcher,
             json={'access_token': valid_access_token}
         )
         m.get(
-            f'http://localhost:5002/v1/{time_resource_name}',
+            f'http://resource-server:8000/v1/{time_resource_name}',
             request_headers={'Authorization': f'Bearer {valid_access_token}'},
             json={time_resource_name: result}
         )
@@ -46,7 +46,7 @@ def time_resource_name(request):
 def test_issue_token_response_error_code_invalid_request(flask_client, time_resource_name):
     with requests_mock.Mocker() as m:
         m.post(
-            'http://localhost:5001/v1/token', status_code=400,
+            'http://oauth2-server:8000/v1/token', status_code=400,
             json={
                 'error': 'invalid_request',
                 'error_description': "Something wrong with your request"
@@ -60,18 +60,18 @@ def test_issue_token_response_error_code_invalid_request(flask_client, time_reso
 def test_issue_token_response_error_http_status_code(flask_client, time_resource_name):
     with requests_mock.Mocker() as m:
         m.post(
-            'http://localhost:5001/v1/token', status_code=500, reason='Internal error'
+            'http://oauth2-server:8000/v1/token', status_code=500, reason='Internal error'
         )
         with pytest.raises(requests.HTTPError) as exc_info:
             flask_client.get(f'/{time_resource_name}')
 
     assert str(exc_info.value) == ("500 Server Error: "
-                                   "Internal error for url: http://localhost:5001/v1/token")
+                                   "Internal error for url: http://oauth2-server:8000/v1/token")
 
 
 def test_issue_token_response_empty_json_body(flask_client, time_resource_name):
     with requests_mock.Mocker() as m:
-        m.post('http://localhost:5001/v1/token', text='Success')
+        m.post('http://oauth2-server:8000/v1/token', text='Success')
         with pytest.raises(apis.IncorrectResponseError) as exc_info:
             flask_client.get(f'/{time_resource_name}')
     assert str(exc_info.value) == "Empty json body"
@@ -79,7 +79,7 @@ def test_issue_token_response_empty_json_body(flask_client, time_resource_name):
 
 def test_issue_token_response_access_token_field_missing(flask_client, time_resource_name):
     with requests_mock.Mocker() as m:
-        m.post('http://localhost:5001/v1/token', json={'token': 'some-token'})
+        m.post('http://oauth2-server:8000/v1/token', json={'token': 'some-token'})
         with pytest.raises(apis.IncorrectResponseError) as exc_info:
             flask_client.get(f'/{time_resource_name}')
     assert str(exc_info.value) == "'access_token' field is missing or wrong type"
@@ -87,7 +87,7 @@ def test_issue_token_response_access_token_field_missing(flask_client, time_reso
 
 def test_issue_token_response_access_token_field_wrong_type(flask_client, time_resource_name):
     with requests_mock.Mocker() as m:
-        m.post('http://localhost:5001/v1/token', json={'access_token': 12345})
+        m.post('http://oauth2-server:8000/v1/token', json={'access_token': 12345})
         with pytest.raises(apis.IncorrectResponseError) as exc_info:
             flask_client.get(f'/{time_resource_name}')
     assert str(exc_info.value) == "'access_token' field is missing or wrong type"
@@ -102,9 +102,9 @@ def test_issue_token_response_access_token_field_wrong_type(flask_client, time_r
 def test_time_resource_response_error_code_expected(flask_client, time_resource_name, error_code,
                                                     error_description, status_code):
     with requests_mock.Mocker() as m:
-        m.post('http://localhost:5001/v1/token', json={'access_token': valid_access_token})
+        m.post('http://oauth2-server:8000/v1/token', json={'access_token': valid_access_token})
         m.get(
-            f'http://localhost:5002/v1/{time_resource_name}', status_code=status_code,
+            f'http://resource-server:8000/v1/{time_resource_name}', status_code=status_code,
             request_headers={'Authorization': f'Bearer {valid_access_token}'},
             json={
                 'error': error_code,
@@ -118,9 +118,9 @@ def test_time_resource_response_error_code_expected(flask_client, time_resource_
 
 def test_time_resource_response_error_code_invalid_request(flask_client, time_resource_name):
     with requests_mock.Mocker() as m:
-        m.post('http://localhost:5001/v1/token', json={'access_token': valid_access_token})
+        m.post('http://oauth2-server:8000/v1/token', json={'access_token': valid_access_token})
         m.get(
-            f'http://localhost:5002/v1/{time_resource_name}', status_code=400,
+            f'http://resource-server:8000/v1/{time_resource_name}', status_code=400,
             request_headers={'Authorization': f'Bearer {valid_access_token}'},
             json={
                 'error': 'invalid_request',
@@ -134,9 +134,9 @@ def test_time_resource_response_error_code_invalid_request(flask_client, time_re
 
 def test_time_resource_response_error_http_status_code(flask_client, time_resource_name):
     with requests_mock.Mocker() as m:
-        m.post('http://localhost:5001/v1/token', json={'access_token': valid_access_token})
+        m.post('http://oauth2-server:8000/v1/token', json={'access_token': valid_access_token})
         m.get(
-            f'http://localhost:5002/v1/{time_resource_name}', status_code=500,
+            f'http://resource-server:8000/v1/{time_resource_name}', status_code=500,
             request_headers={'Authorization': f'Bearer {valid_access_token}'},
             reason="Internal error"
         )
@@ -144,15 +144,15 @@ def test_time_resource_response_error_http_status_code(flask_client, time_resour
             flask_client.get(f'/{time_resource_name}')
 
     assert str(exc_info.value) == (
-        f"500 Server Error: Internal error for url: http://localhost:5002/v1/{time_resource_name}"
+        f"500 Server Error: Internal error for url: http://resource-server:8000/v1/{time_resource_name}"
     )
 
 
 def test_time_resource_response_empty_json_body(flask_client, time_resource_name):
     with requests_mock.Mocker() as m:
-        m.post('http://localhost:5001/v1/token', json={'access_token': valid_access_token})
+        m.post('http://oauth2-server:8000/v1/token', json={'access_token': valid_access_token})
         m.get(
-            f'http://localhost:5002/v1/{time_resource_name}',
+            f'http://resource-server:8000/v1/{time_resource_name}',
             request_headers={'Authorization': f'Bearer {valid_access_token}'},
             text="Success"
         )
@@ -163,9 +163,9 @@ def test_time_resource_response_empty_json_body(flask_client, time_resource_name
 
 def test_time_resource_response_time_field_missing(flask_client, time_resource_name):
     with requests_mock.Mocker() as m:
-        m.post('http://localhost:5001/v1/token', json={'access_token': valid_access_token})
+        m.post('http://oauth2-server:8000/v1/token', json={'access_token': valid_access_token})
         m.get(
-            f'http://localhost:5002/v1/{time_resource_name}',
+            f'http://resource-server:8000/v1/{time_resource_name}',
             request_headers={'Authorization': f'Bearer {valid_access_token}'},
             json={'foo': '3'}
         )
@@ -176,9 +176,9 @@ def test_time_resource_response_time_field_missing(flask_client, time_resource_n
 
 def test_current_time_response_wrong_field_type(flask_client):
     with requests_mock.Mocker() as m:
-        m.post('http://localhost:5001/v1/token', json={'access_token': valid_access_token})
+        m.post('http://oauth2-server:8000/v1/token', json={'access_token': valid_access_token})
         m.get(
-            'http://localhost:5002/v1/current_time',
+            'http://resource-server:8000/v1/current_time',
             request_headers={'Authorization': f'Bearer {valid_access_token}'},
             json={'current_time': 1575594001}
         )
@@ -189,9 +189,9 @@ def test_current_time_response_wrong_field_type(flask_client):
 
 def test_epoch_time_response_wrong_field_type(flask_client):
     with requests_mock.Mocker() as m:
-        m.post('http://localhost:5001/v1/token', json={'access_token': valid_access_token})
+        m.post('http://oauth2-server:8000/v1/token', json={'access_token': valid_access_token})
         m.get(
-            'http://localhost:5002/v1/epoch_time',
+            'http://resource-server:8000/v1/epoch_time',
             request_headers={'Authorization': f'Bearer {valid_access_token}'},
             json={'epoch_time': '2019-12-06T01:00:01+00:00'}
         )
