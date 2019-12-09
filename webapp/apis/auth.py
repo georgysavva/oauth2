@@ -4,6 +4,10 @@ import requests
 
 from apis import BaseAPIClient, IncorrectResponseError
 
+"""
+The purpose of this module is to interact with the oauth2 server API via http.
+"""
+
 logger = logging.getLogger(__name__)
 
 

@@ -5,6 +5,10 @@ import requests
 
 from apis import BaseAPIClient, IncorrectResponseError, APIError
 
+"""
+The purpose of this module is to interact with the resource server API via http.
+"""
+
 logger = logging.getLogger(__name__)
 
 ERROR_CODE_INVALID_ACCESS_TOKEN = 'invalid_access_token'

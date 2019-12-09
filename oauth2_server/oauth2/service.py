@@ -11,6 +11,11 @@ logger = logging.getLogger(__name__)
 
 
 class Oauth2Service:
+    """
+    This class contains oauth2 business logic layer.
+    It responsible for validating client and user data and issuing new access tokens.
+    It also validates access tokens and returns information contained in them.
+    """
     jwt_algorithm = 'HS256'
 
     def __init__(

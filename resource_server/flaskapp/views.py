@@ -6,6 +6,11 @@ import apis.auth
 from timer.exceptions import PermissionDeniedError
 from timer.service import TimerService
 
+"""
+This module is responsible for working with http transport layer. 
+It parses and validates http request data and serializes data from the business logic layer.
+"""
+
 logger = logging.getLogger(__name__)
 
 ERROR_INVALID_REQUEST = 'invalid_request'

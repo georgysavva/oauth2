@@ -10,6 +10,9 @@ FLASK_APP_DIR = os.path.join(paths.BASE_DIR, 'flaskapp')
 
 
 def create_app(http_handler: views.AuthorizationHandler) -> Flask:
+    """
+    Bound http layer class (handler) to the new flask application
+    """
     app = Flask(__name__)
     app.config['JSONSCHEMA_DIR'] = os.path.join(FLASK_APP_DIR, 'json_schemas')
     flask_jsonschema.JsonSchema(app)

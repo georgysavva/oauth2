@@ -9,6 +9,10 @@ from inmem_storage.applications import InMemApplicationsRepo
 from models import models
 from oauth2.service import Oauth2Service
 
+"""
+This module is responsible for all instances in the application using the configuration settings.
+"""
+
 
 def create_applications_repository(default_apps: Optional[List[dict]] = None
                                    ) -> InMemApplicationsRepo:

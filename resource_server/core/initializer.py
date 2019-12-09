@@ -8,6 +8,10 @@ from core import config
 from flaskapp import views
 from timer.service import TimerService
 
+"""
+This module is responsible for all instances in the application using the configuration settings.
+"""
+
 
 def create_auth_api_client(auth_api_base_url: Optional[str] = None,
                            http_request_timeout: Optional[int] = None) -> AuthAPI:

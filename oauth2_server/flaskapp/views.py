@@ -7,6 +7,11 @@ from flask import request, jsonify, Flask
 from oauth2 import exceptions
 from oauth2.service import Oauth2Service
 
+"""
+This module is responsible for working with http transport layer. 
+It parses and validates http request data and serializes data from the business logic layer.
+"""
+
 logger = logging.getLogger(__name__)
 
 # Error code are from the oauth2 rfc:

@@ -6,6 +6,10 @@ import requests
 from apis import BaseAPIClient, APIError, IncorrectResponseError
 from models import models
 
+"""
+The purpose of this module is to interact with the oauth2 server API via http.
+"""
+
 logger = logging.getLogger(__name__)
 
 ERROR_CODE_INVALID_ACCESS_TOKEN = 'invalid_access_token'

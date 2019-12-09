@@ -39,6 +39,9 @@ class AccessTokenInfo:
 
 
 class ApplicationsRepository(metaclass=abc.ABCMeta):
+    """
+    This is an interface for Applications storage. It can be implemented in memory or in a DB.
+    """
     @abc.abstractmethod
     def get(self, client_id: str) -> Application:
         pass

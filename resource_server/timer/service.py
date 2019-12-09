@@ -10,6 +10,13 @@ logger = logging.getLogger(__name__)
 
 
 class TimerService:
+    """
+    This class contains resource business logic layer.
+    It requests access token information from the oauth2 server and validates
+    that the token scope includes requested resource.
+    If request is valid it return the resource (current_time or epoch_time).
+    """
+
     def __init__(self, auth_api: AuthAPI):
         self._auth_api = auth_api
 
