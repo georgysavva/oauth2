@@ -24,14 +24,14 @@ class Handler:
         logger.info("Requesting current time resource")
         result = self._resource_api.get_current_time(access_token)
         logger.info("Resource current time obtained", extra={'current_time': result})
-        return result
+        return result + '\n'
 
     def get_epoch_time(self):
         access_token = self._get_access_token()
         logger.info("Requesting epoch time resource")
         result = self._resource_api.get_epoch_time(access_token)
         logger.info("Resource epoch time obtained", extra={'epoch_time': result})
-        return str(result)
+        return str(result) + '\n'
 
     def _get_access_token(self) -> str:
         grant_type = 'password'
@@ -62,4 +62,4 @@ def register_error_handlers(flask_app: Flask) -> None:
 # Without translating it in something that would non-technical user understands.
 def handle_resource_authorization_error(error: apis.resource.ResourceAuthorizationError):
     logger.warning("Resource server authorization failed", extra={'error': error})
-    return str(error), 403 if isinstance(error, apis.resource.PermissionDeniedError) else 401
+    return str(error) + '\n', 403 if isinstance(error, apis.resource.PermissionDeniedError) else 401

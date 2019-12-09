@@ -35,7 +35,7 @@ def test_get_current_time_and_epoch_time_smoke(flask_client, time_resource_name,
         )
         resp = flask_client.get(f'/{time_resource_name}')
     assert resp.status_code == 200
-    assert resp.data.decode() == str(result)
+    assert resp.data.decode() == str(result) + '\n'
 
 
 @pytest.fixture(params=['current_time', 'epoch_time'])
@@ -112,7 +112,7 @@ def test_time_resource_response_error_code_expected(flask_client, time_resource_
             }
         )
         resp = flask_client.get(f'/{time_resource_name}')
-    assert resp.data.decode() == error_description
+    assert resp.data.decode() == error_description + '\n'
     assert resp.status_code == status_code
 
 
