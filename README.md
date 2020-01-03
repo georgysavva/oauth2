@@ -24,7 +24,7 @@ all information contained in the JWT payload.
 
 
 # Design and implementation details 
-* All services (Webapp, OAuth2 server, Resource server) are implemented in python3.7 and Flask. They are wrapped in separate docker containers and can be easily started by `docker-compose up`. There is no persistence layer since we only need to store registered oauth2 applications and for the simplicity they are stored in the memory.
+* All services (Webapp, OAuth2 server, Resource server) are implemented in python3.7 and Flask. They are wrapped in separate docker containers and can be easily started by `docker-compose up`. There is no persistence layer since we only need to store registered OAuth2 applications and for the simplicity they are stored in the memory.
 * Services are built in the spirit of [Clean Architecture](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html). So the transport layer (http and Flask) is only responsible for obtaining data from the http request and returning data as http json response. The business logic layer lives separately and knows nothing about the http protocol or Flask. It allows us to easily switch from http and json to gRPC and protobuf without touching the core logic. And we aren't bound to a specific web framework.
 * All services are well covered with unit tests using `pytest` library. They test only code and don’t depend on other services and the environment they are running in.
 * All logs are structured and follow an event message style. Logs are formatted as json to simplify further parsing and investigation in production.
@@ -54,7 +54,7 @@ After that in the project root run:
 ` ./run-unittests-docker.sh`
 
 
-# Some possible further improvements:
+# Possible further improvements:
 The code base is ready for production in general. But of course there are something that should be done to ensure good maintaining and scaling in the future.
 * Add Sentry support to see all errors in production.
 * Use python context variables to store request bound values such as user_id, client_id, request_id and blend them into each log record via logging.Filter. It will simplify logs investigation.
