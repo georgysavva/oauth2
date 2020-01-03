@@ -1,18 +1,18 @@
 # OAuth2 system implementation 
 This repository contains implementation of a system that uses OAuth2 protocol. The system consists of 3 distinct components:
-* The OAuth2 authorization server.
-* The Resource server, i.e. API protected by the OAuth2
-* The Webapp, that uses the API. Webapp is server-side (not a single page js application) and in our use case we will follow a simple no-UI approach. Our end users will make `curl` calls to the Webapp, which will obtain the answers by calling an API in the Resource server.
+* The API or Resource server in OAuth2 terms. API contains all user data and operates on it.
+* The OAuth2 authorization server that protects the API and gives permission to applications to consume it. 
+* The Webapp, that consumes the API or just Application in OAuth2 terms. Webapp is server-side (not a single page js application) and in our use case we will follow a simple no-UI approach. Our end users will make `curl` calls to the Webapp, which will obtain the answers by calling an API in the Resource server.
 
 ### Some important points about the system:
 * Resource server has only 2 endpoints: `/current_time`, to retrieve the current server time (any standard format), and `/epoch_time` to retrieve the current time as number of seconds since epoch.
 * In OAuth2 the application first registers itself with the authorization server. We will consider that such registration has already been performed where the application properly registered a callback url to it and the app received a client ID = "1234" and client secret = "qwerty".
-* OAuth2 protocol supports several flows of acquiring the access token from the authorization server and they depend on the type of the application (third party, first party, client side or server side). In the current implementation we assume that the application (Webapp) is a first party application (developed by the same company as the resource server), i.e. it can ask user for his credentials (username and password) and provide them to the authorization server. That flow is called `owner password` grant type. For simplicity sake we skip the request to the user to enter his username/password via UI. We consider that OAuth2 server always grants access for any username/password for two endponts proposed above (`/current_time`, `/epoch_time`).
+* OAuth2 protocol supports several flows of acquiring the access token from the authorization server and they depend on the type of the application (third party, first party, client side or server side). In the current implementation we assume that the application (Webapp) is a first party application (developed by the same company as the resource server), i.e. it can ask user for his credentials (username and password) and provide them to the authorization server. That flow is called `owner password` grant type. For simplicity sake we skip the request to the user to enter his username/password via UI. We consider that OAuth2 server always grants access for any username/password for two endpoints proposed above (`/current_time`, `/epoch_time`).
 * The access token obtained by the Webapp are short-lived (5 seconds). For simplicity we will consider that each individual user call triggers the request of a new token. Tokens is encoded using [JWT format](https://jwt.io).
 * OAuth2 server doesn't support `refresh tokens`. 
 
 ### User request flow steps: 
-1. User calls webapp via `curl`.
+1. User calls Webapp via `curl`.
 2. Webapp requests an access token from the OAuth2 server.
 3. OAuth2 server validates the application and if everything is OK. Issues a new access token in the JWT format.
 3. Webapp gets access token from the OAuth2 server. The token is short-lived so we don’t store it in Webapp and request it on every user call. Webapp calls the API (Resource server) providing the access token to get the information that was requested by user.
@@ -24,7 +24,7 @@ all information contained in the JWT payload.
 
 
 # Design and implementation details 
-* All services (Webapp, OAuth2 server, Resource server) are implemented in python3.7 and Flask. They are wrapped in separate docker containers and can be easily started by `docker-compose up`. There is no persistence layer since we only need to store registered OAuth2 applications and for the simplicity they are stored in the memory.
+* All services (Webapp, OAuth2 server, Resource server) are implemented in python 3.7 and Flask. They are wrapped in separate docker containers and can be easily started by `docker-compose up`. There is no persistence layer since we only need to store registered OAuth2 applications and for the simplicity they are stored in the memory.
 * Services are built in the spirit of [Clean Architecture](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html). So the transport layer (http and Flask) is only responsible for obtaining data from the http request and returning data as http json response. The business logic layer lives separately and knows nothing about the http protocol or Flask. It allows us to easily switch from http and json to gRPC and protobuf without touching the core logic. And we aren't bound to a specific web framework.
 * All services are well covered with unit tests using `pytest` library. They test only code and don’t depend on other services and the environment they are running in.
 * All logs are structured and follow an event message style. Logs are formatted as json to simplify further parsing and investigation in production.
