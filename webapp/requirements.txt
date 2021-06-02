@@ -21,7 +21,7 @@ python-json-logger==0.1.11
 requests==2.22.0
 requests-mock==1.7.0
 six==1.13.0
-urllib3==1.25.7
+urllib3==1.26.5
 wcwidth==0.1.7
 Werkzeug==0.16.0
 zipp==0.6.0
